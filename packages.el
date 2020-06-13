@@ -50,3 +50,5 @@
 ;(unpin! t)
 
 (package! company-qml)
+
+(package! org-roam-server)
