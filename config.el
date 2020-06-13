@@ -22,8 +22,8 @@
 ;; (setq doom-font (font-spec :family "monospace" :size 12 :weight 'semi-light)
 ;;       doom-variable-pitch-font (font-spec :family "sans" :size 13))
 
-(setq doom-font (font-spec :family "VictorMono Nerd Font" :size 11.0 :weight 'semi-bold)
-      doom-variable-pitch-font (font-spec :family "Noto Sans" :size 13.0 :weight 'semi-bold))
+(setq doom-font (font-spec :family "VictorMono Nerd Font" :size 10.0 :weight 'semi-bold)
+      doom-variable-pitch-font (font-spec :family "VictorMono Nerd Font" :size 11.0 :weight 'semi-bold))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -69,6 +69,7 @@
 
 ;; Change default evil escape sequence to spacemacs style
 (setq evil-escape-key-sequence "fd")
+
 
 ;; Make Emacs transparent
 (set-frame-parameter (selected-frame) 'alpha '(70 70))
