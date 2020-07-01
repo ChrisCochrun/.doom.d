@@ -50,5 +50,7 @@
 ;(unpin! t)
 
 (package! company-qml)
-
 (package! org-roam-server)
+(package! org-super-agenda)
+(package! exwm)
+(package! olivetti)
