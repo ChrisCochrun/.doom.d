@@ -54,3 +54,4 @@
 (package! org-super-agenda)
 (package! exwm)
 (package! olivetti)
+(package! org-autolist)

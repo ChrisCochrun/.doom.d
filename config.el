@@ -161,10 +161,12 @@
 ;; org
 (setq org-superstar-headline-bullets-list '("◉" "◈" "▸" "◎" "✬" "◇" "❉" "✙" "❖"))
 (setq olivetti-body-width 0.6)
-(add-hook! org-mode (setq hl-line-mode nil)
-                      olivetti-mode)
+(add-hook! org-mode (setq hl-line-mode nil))
 
 (add-hook! 'org-mode-hook (lambda () (imenu-add-to-menubar "Imenu")))
+
+(add-hook! org-mode (olivetti-mode t))
+(add-hook! org-mode (org-autolist-mode t))
 
 ;; (defun org-yt-follow-mpv (video-id)
 ;;   "Open youtube with VIDEO-ID."
