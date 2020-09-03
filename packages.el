@@ -55,3 +55,9 @@
 (package! exwm)
 (package! olivetti)
 (package! org-autolist)
+(package! emms)
+(package! nov)
+(package! mu4e-views)
+(package! gdscript-mode
+          :recipe (:host github
+                   :repo "GDQuest/emacs-gdscript-mode"))

@@ -1,3 +1,12 @@
+#+TITLE: Doom Emacs Config
+#+AUTHOR: Chris Cochrun
+#+PROPERTY: header-args :tangle config.el
+#+DESCRIPTION: This is my literate emacs config
+
+* Start of File
+Welcome to my doom emacs config. I'm using literate programming because it allows me to more cleanly edit each piece without individual files and allowing me to describe better what each block of code does.
+
+#+BEGIN_SRC elisp
 (setq user-full-name "Chris Cochrun"
       user-mail-address "chris@tfcconnection.org")
 
@@ -68,6 +77,10 @@
 ;; gdscript
 (require 'gdscript-mode)
 
+#+END_SRC
+* Doom Modeline
+
+#+BEGIN_SRC elisp
 (setq
  all-the-icons-scale-factor 0.8
  doom-modeline-height 30
@@ -78,6 +91,113 @@
 
 (display-time-mode nil)
 (setq display-time-format "%a %b %y, %l:%M %p")
+#+END_SRC
+
+* EXWM
+
+#+BEGIN_SRC elisp :tangle no
+(set-frame-parameter nil 'fullscreen 'fullboth)
+(require 'exwm)
+(require 'exwm-config)
+(exwm-config-default)
+(require 'exwm-randr)
+(setq exwm-randr-workspace-monitor-plist '(0 "DVI-D-0" 1 "HDMI-0"))
+(add-hook! 'exwm-randr-screen-change-hook
+  (lambda ()
+    (start-process-shell-command
+     "xrandr" nil "xrandr --output DVI-D-0 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output HDMI-0 --mode 1600x900 --pos 1920x0 --rotate normal")))
+(exwm-randr-enable)
+(require 'exwm-systemtray)
+(exwm-systemtray-enable)
+(setq exwm-systemtray-height 18)
+(setq exwm-systemtray-icon-gap 6)
+(setq exwm-workspace-number 8)
+(setq exwm-workspace-show-all-buffers t)
+
+(defun exwm-workspace-next ()
+  "Move forward one workspace."
+  (interactive)
+  (if (< exwm-workspace-current-index (1- exwm-workspace-number))
+      (exwm-workspace-switch (1+ exwm-workspace-current-index))
+    (message "No next workspace.")))
+
+(defun exwm-workspace-prev ()
+  "Move to the previous workspace."
+  (interactive)
+  (if (> exwm-workspace-current-index 0)
+      (exwm-workspace-switch (1- exwm-workspace-current-index))
+    (message "No previous workspace.")))
+
+(defun exwm-flameshot ()
+  "Take a screenshot using flameshot"
+  (interactive)
+  (shell-command "flameshot gui"))
+
+(defun exwm-rofi ()
+  "use rofi to launch programs"
+  (interactive)
+  (shell-command "/home/chris/.dotfiles/rofi/launchers-git/launcher.sh"))
+
+;;Global keybindings
+(setq exwm-input-global-keys
+          `(
+            ;; 's-r': Reset (to line-mode).
+            ([?\s-r] . exwm-reset)
+            ;; 's-w': Switch workspace.
+            ([?\s-w] . exwm-workspace-switch)
+            ([?\s-j] . exwm-workspace-prev)
+            ([?\s-k] . exwm-workspace-next)
+            ;; Switch Buffer
+            ([?\s-b] . exwm-workspace-switch-to-buffer)
+            ;; close app
+            ([?\s-c] . kill-buffer)
+            ;; screenshot
+            ([print] . exwm-flameshot)
+            ;; 's-&': Launch application.
+            ([?\s-r] . (lambda (command)
+                         (interactive (list (read-shell-command "$ ")))
+                         (start-process-shell-command command nil command)))
+            ([menu] . exwm-rofi)
+            ;; 's-N': Switch to certain workspace.
+            ,@(mapcar (lambda (i)
+                        `(,(kbd (format "s-%d" i)) .
+                          (lambda ()
+                            (interactive)
+                            (exwm-workspace-switch-create ,i))))
+                      (number-sequence 0 9))))
+
+(start-process-shell-command "nextcloud" nil "nextcloud")
+(start-process-shell-command "caffeine" nil "caffeine")
+(start-process-shell-command "xset" nil "xset r rate 220 90")
+(start-process-shell-command "fehwall" nil "feh --bg-fill ~/Pictures/wallpapers/RoyalKing.png")
+(start-process-shell-command "picom" nil "picom")
+(start-process-shell-command "flameshot" nil "flameshot")
+
+;; (exwm-manage-configurations '(((string= exwm-class-name "Steam")
+;;                                workspace 9
+;;                                floating t)
+;;                               ((string= exwm-class-name "hl2_linux")
+;;                                floating-mode-line nil)
+;;                               ((string= exwm-class-name "TelegramDesktop")
+;;                                workspace 8)
+;;                               ((string= exwm-class-name "discord")
+;;                                workspace 7)
+;;                               ((or (string-match-p "libreoffice"
+;;                                                    exwm-class-name)
+;;                                    (string= exwm-class-name "MuseScore3")
+;;                                    (string= exwm-class-name "Gimp"))
+;;                                workspace 6)
+;;                               ((string= exwm-title "Event Tester")
+;;                                floating-mode-line nil
+;;                                floating t)))
+
+
+
+#+END_SRC
+
+* Org Mode
+
+#+BEGIN_SRC elisp
 
 ;; org
 (setq org-superstar-headline-bullets-list '("◉" "◈" "▸" "◎" "✬" "◇" "❉" "✙" "❖"))
@@ -155,6 +275,11 @@
   (org-super-agenda-mode))
 (setq org-super-agenda-header-map nil)
 
+#+END_SRC
+
+* Org Roam
+
+#+BEGIN_SRC elisp
 ;; Org-Roam
 (setq org-roam-directory "~/org")
 (setq org-roam-buffer-width 0.25)
@@ -180,6 +305,12 @@
         org-roam-server-network-label-wrap-length 20))
 
 (add-hook! org-roam-mode org-roam-server-mode t)
+#+END_SRC
+
+* Elfeed
+
+#+BEGIN_SRC elisp
+
 
 ;; elfeed
 (map! :leader "o F" 'elfeed)
@@ -224,6 +355,14 @@
 (map! :map elfeed-search-mode-map
       :n "v" 'elfeed-view-mpv
       :n "a" 'elfeed-view-mpv-audio)
+
+
+#+END_SRC
+
+* Mu4e
+
+#+BEGIN_SRC elisp
+
 
 ;; Email
 
@@ -291,6 +430,9 @@
 (map! :map mu4e-headers-mode-map
       :n "H" #'mu4e-views-mu4e-select-view-msg-method)
 
+#+END_SRC
+* Misc
+#+BEGIN_SRC elisp
 ;; Set Vterm to zsh
 (setq vterm-shell "/bin/fish")
 
@@ -301,5 +443,10 @@
 ;; Make Emacs transparent
 (set-frame-parameter (selected-frame) 'alpha '(70 70))
 (add-to-list 'default-frame-alist '(alpha 70 70))
-
+#+END_SRC
+* Tramp
+Tramp for ZSH
+Needed to allow me to remote to servers using zsh as the main shell
+#+BEGIN_SRC elisp
 (setq tramp-terminal-type "tramp")
+#+END_SRC
