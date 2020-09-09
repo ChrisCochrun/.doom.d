@@ -61,3 +61,12 @@
 (package! gdscript-mode
           :recipe (:host github
                    :repo "GDQuest/emacs-gdscript-mode"))
+(package! fennel-mode)
+(package! rg)
+
+
+;; Experiment with selectrum instead of ivy
+;; (package! prescient)
+;; (package! selectrum)
+;; (package! selectrum-prescient)
+;; (package! company-prescient)

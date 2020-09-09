@@ -1,3 +1,4 @@
+;;; config.el -*- lexical-binding: t; -*-
 (setq user-full-name "Chris Cochrun"
       user-mail-address "chris@tfcconnection.org")
 
@@ -15,7 +16,7 @@
 ;;       doom-variable-pitch-font (font-spec :family "sans" :size 13))
 
 (setq doom-font (font-spec :family "VictorMono Nerd Font" :size 12.0 :weight 'semi-bold)
-      doom-variable-pitch-font (font-spec :family "VictorMono Nerd Font" :size 13.0 :weight 'semi-bold))
+      doom-variable-pitch-font (font-spec :family "Noto Sans" :size 13.0 :weight 'semi-bold))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -55,6 +56,9 @@
 ;; Author: Chris Cochrun
 ;; Email: chris@tfcconnection.org
 
+(setq-default delete-by-moving-to-trash t
+              tab-width 4)
+
 ;; QT/QML
 ;; Ensure qml is added to the completion engine company
 (add-to-list 'company-backends 'company-qml)
@@ -76,8 +80,13 @@
  doom-modeline-mu4e t
  doom-modeline-bar-width 3)
 
-(display-time-mode nil)
-(setq display-time-format "%a %b %y, %l:%M %p")
+(defun doom-modeline-conditional-buffer-encoding ()
+  "We expect the encoding to be LF UTF-8, so only show the modeline when this is not the case"
+  (setq-local doom-modeline-buffer-encoding
+              (unless (or (eq buffer-file-coding-system 'utf-8-unix)
+                          (eq buffer-file-coding-system 'utf-8)))))
+
+(add-hook 'after-change-major-mode-hook #'doom-modeline-conditional-buffer-encoding)
 
 ;; org
 (setq org-superstar-headline-bullets-list '("◉" "◈" "▸" "◎" "✬" "◇" "❉" "✙" "❖"))
@@ -91,7 +100,8 @@
 (add-hook! org-mode (org-autolist-mode t))
 
 (map! :map org-mode-map
-      :n "M-<tab>" 'org-show-subtree)
+      :n "M-<tab>" 'org-show-subtree
+      :n "C-M-o" 'turn-on-olivetti-mode)
 
 ;; (defun org-yt-follow-mpv (video-id)
 ;;   "Open youtube with VIDEO-ID."
@@ -175,11 +185,15 @@
         org-roam-server-port 8080
         org-roam-server-export-inline-images t
         org-roam-server-authenticate nil
+        org-roam-server-serve-files t
         org-roam-server-network-label-truncate t
         org-roam-server-network-label-truncate-length 60
         org-roam-server-network-label-wrap-length 20))
 
 (add-hook! org-roam-mode org-roam-server-mode t)
+
+(setq +zen-text-scale 1.5)
+;; (setq writeroom-global-effects writeroom-set-menu-bar-lines writeroom-set-tool-bar-lines writeroom-set-vertical-scroll-bars writeroom-set-bottom-divider-width)
 
 ;; elfeed
 (map! :leader "o F" 'elfeed)
@@ -271,6 +285,7 @@
 (setq   mu4e-maildir-shortcuts
     '((:maildir "/office/Archive"               :key ?a)
      (:maildir "/office/INBOX"                  :key ?i)
+     (:maildir "/outlook/INBOX"                 :key ?l)
      (:maildir "/office/Junk Email"             :key ?j)
      (:maildir "/office/INBOX/Website Forms"    :key ?f)
      (:maildir "/gmail/INBOX"                   :key ?g)
@@ -278,15 +293,14 @@
 
 (add-hook! 'mu4e-view-mode-hook evil-normal-state)
 
-
-;; (use-package! mu4e-views
-;;   :after mu4e
-;;   :defer nil
-;;   :config
-;;   (setq mu4e-views-completion-method 'ivy) ;; use ivy for completion
-;;   (setq mu4e-views-default-view-method "html") ;; make xwidgets default
-;;   (mu4e-views-mu4e-use-view-msg-method "html") ;; select the default
-;;   (setq mu4e-views-next-previous-message-behaviour 'stick-to-current-window)) ;; when pressing n and p stay in the current window
+(use-package! mu4e-views
+  :after mu4e
+  :defer nil
+  :config
+  (setq mu4e-views-completion-method 'ivy) ;; use ivy for completion
+  (setq mu4e-views-default-view-method "html") ;; make xwidgets default
+  (mu4e-views-mu4e-use-view-msg-method "html") ;; select the default
+  (setq mu4e-views-next-previous-message-behaviour 'stick-to-current-window)) ;; when pressing n and p stay in the current window
 
 (map! :map mu4e-headers-mode-map
       :n "H" #'mu4e-views-mu4e-select-view-msg-method)
@@ -299,7 +313,11 @@
 
 
 ;; Make Emacs transparent
-(set-frame-parameter (selected-frame) 'alpha '(70 70))
-(add-to-list 'default-frame-alist '(alpha 70 70))
+(set-frame-parameter (selected-frame) 'alpha '(100 100))
+(add-to-list 'default-frame-alist '(alpha 100 100))
+
+;; Using counsel-linux-app for app launcher
+(custom-set-variables '(counsel-linux-app-format-function #'counsel-linux-app-format-function-name-first))
+(setq +ivy-buffer-preview t)
 
 (setq tramp-terminal-type "tramp")

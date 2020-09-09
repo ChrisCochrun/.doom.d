@@ -7,6 +7,7 @@
 Welcome to my doom emacs config. I'm using literate programming because it allows me to more cleanly edit each piece without individual files and allowing me to describe better what each block of code does.
 
 #+BEGIN_SRC elisp
+;;; config.el -*- lexical-binding: t; -*-
 (setq user-full-name "Chris Cochrun"
       user-mail-address "chris@tfcconnection.org")
 
@@ -24,7 +25,7 @@ Welcome to my doom emacs config. I'm using literate programming because it allow
 ;;       doom-variable-pitch-font (font-spec :family "sans" :size 13))
 
 (setq doom-font (font-spec :family "VictorMono Nerd Font" :size 12.0 :weight 'semi-bold)
-      doom-variable-pitch-font (font-spec :family "VictorMono Nerd Font" :size 13.0 :weight 'semi-bold))
+      doom-variable-pitch-font (font-spec :family "Noto Sans" :size 13.0 :weight 'semi-bold))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -64,6 +65,9 @@ Welcome to my doom emacs config. I'm using literate programming because it allow
 ;; Author: Chris Cochrun
 ;; Email: chris@tfcconnection.org
 
+(setq-default delete-by-moving-to-trash t
+              tab-width 4)
+
 ;; QT/QML
 ;; Ensure qml is added to the completion engine company
 (add-to-list 'company-backends 'company-qml)
@@ -80,6 +84,7 @@ Welcome to my doom emacs config. I'm using literate programming because it allow
 #+END_SRC
 * Doom Modeline
 
+Doom's modeline is great, but with just a bit of tweaking, it's even better.
 #+BEGIN_SRC elisp
 (setq
  all-the-icons-scale-factor 0.8
@@ -88,15 +93,39 @@ Welcome to my doom emacs config. I'm using literate programming because it allow
  doom-modeline-major-mode-color-icon t
  doom-modeline-mu4e t
  doom-modeline-bar-width 3)
+#+END_SRC
 
-(display-time-mode nil)
-(setq display-time-format "%a %b %y, %l:%M %p")
+LF UTF-8 is the default file encoding. So it's not worth showing in the modeline when it is the files encoding. Let's hide it unless it's different from LF UTF-8.
+#+BEGIN_SRC elisp
+(defun doom-modeline-conditional-buffer-encoding ()
+  "We expect the encoding to be LF UTF-8, so only show the modeline when this is not the case"
+  (setq-local doom-modeline-buffer-encoding
+              (unless (or (eq buffer-file-coding-system 'utf-8-unix)
+                          (eq buffer-file-coding-system 'utf-8)))))
+
+(add-hook 'after-change-major-mode-hook #'doom-modeline-conditional-buffer-encoding)
 #+END_SRC
 
 * EXWM
+:PROPERTIES:
+:header-args: :tangle no
+:END:
 
-#+BEGIN_SRC elisp :tangle no
+Through the power of Org-Mode we can turn this off and on depending on if the next time Emacs is launched I want it to be my window manager.
+
+When using exwm, the loading process looks nicer if we set it to launch fullscreen at first.
+#+BEGIN_SRC elisp
 (set-frame-parameter nil 'fullscreen 'fullboth)
+#+END_SRC
+
+Also, we need a way to display the time.
+#+BEGIN_SRC elisp
+(display-time-mode t)
+(setq display-time-interval 10)
+(setq display-time-format "%a %b %e, %l:%M %p")
+#+END_SRC
+
+#+BEGIN_SRC elisp
 (require 'exwm)
 (require 'exwm-config)
 (exwm-config-default)
@@ -148,16 +177,17 @@ Welcome to my doom emacs config. I'm using literate programming because it allow
             ([?\s-j] . exwm-workspace-prev)
             ([?\s-k] . exwm-workspace-next)
             ;; Switch Buffer
-            ([?\s-b] . exwm-workspace-switch-to-buffer)
+            ([?\s-b] . +ivy/switch-buffer)
+            ([?\s-m] . exwm-workspace-move-window)
             ;; close app
-            ([?\s-c] . kill-buffer)
+            ([?\s-c] . kill-this-buffer)
             ;; screenshot
             ([print] . exwm-flameshot)
             ;; 's-&': Launch application.
             ([?\s-r] . (lambda (command)
                          (interactive (list (read-shell-command "$ ")))
                          (start-process-shell-command command nil command)))
-            ([menu] . exwm-rofi)
+            ([menu] . counsel-linux-app)
             ;; 's-N': Switch to certain workspace.
             ,@(mapcar (lambda (i)
                         `(,(kbd (format "s-%d" i)) .
@@ -166,33 +196,56 @@ Welcome to my doom emacs config. I'm using literate programming because it allow
                             (exwm-workspace-switch-create ,i))))
                       (number-sequence 0 9))))
 
-(start-process-shell-command "nextcloud" nil "nextcloud")
-(start-process-shell-command "caffeine" nil "caffeine")
+(setq exwm-floating-border-width 0)
+(setq exwm-manage-configurations '(((or (string-match-p "libreoffice"
+                                                   exwm-class-name)
+                                   (string= exwm-class-name "MuseScore3")
+                                   (string= exwm-class-name "Gimp")
+                                   (string= exwm-class-name "mpv")
+                                   (string= exwm-title "Event Tester"))
+                               floating t
+                               floating-mode-line nil
+                               )))
+
+
 (start-process-shell-command "xset" nil "xset r rate 220 90")
 (start-process-shell-command "fehwall" nil "feh --bg-fill ~/Pictures/wallpapers/RoyalKing.png")
 (start-process-shell-command "picom" nil "picom")
 (start-process-shell-command "flameshot" nil "flameshot")
+(start-process-shell-command "nextcloud" nil "nextcloud")
+(start-process-shell-command "caffeine" nil "caffeine")
+(start-process-shell-command "kdeconnect-indicator" nil "kdeconnect-indicator")
 
-;; (exwm-manage-configurations '(((string= exwm-class-name "Steam")
-;;                                workspace 9
-;;                                floating t)
-;;                               ((string= exwm-class-name "hl2_linux")
-;;                                floating-mode-line nil)
-;;                               ((string= exwm-class-name "TelegramDesktop")
-;;                                workspace 8)
-;;                               ((string= exwm-class-name "discord")
-;;                                workspace 7)
-;;                               ((or (string-match-p "libreoffice"
-;;                                                    exwm-class-name)
-;;                                    (string= exwm-class-name "MuseScore3")
-;;                                    (string= exwm-class-name "Gimp"))
-;;                                workspace 6)
-;;                               ((string= exwm-title "Event Tester")
-;;                                floating-mode-line nil
-;;                                floating t)))
+#+END_SRC
 
+Make sure that Ivy's posframe loads above exwm windows
+#+BEGIN_SRC elisp
+(setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
+(defun +ivy-posframe-display-exwm (str)
+  (ivy-posframe--display str
+   (lambda (info)
+     (let* ((workarea (elt exwm-workspace--workareas exwm-workspace-current-index))
+            (x (aref workarea 0))
+            (y (aref workarea 1))
 
+            (fw (aref workarea 2))
+            (fh (aref workarea 3))
 
+            (pw (plist-get info :posframe-width))
+            (ph (plist-get info :posframe-height)))
+
+       (cons (+ x (/ (- fw pw) 2)) (+ y (/ (- fh ph) 2)))))))
+
+(setq ivy-posframe-display-functions-alist
+      '((t . +ivy-posframe-display-exwm))
+
+      ivy-posframe-parameters '((parent-frame nil)
+                                (z-group . above)))
+
+;; force set frame-position on every posframe display
+(advice-add 'posframe--set-frame-position :before
+            (lambda (&rest args)
+              (setq-local posframe--last-posframe-pixel-position nil)))
 #+END_SRC
 
 * Org Mode
@@ -211,7 +264,8 @@ Welcome to my doom emacs config. I'm using literate programming because it allow
 (add-hook! org-mode (org-autolist-mode t))
 
 (map! :map org-mode-map
-      :n "M-<tab>" 'org-show-subtree)
+      :n "M-<tab>" 'org-show-subtree
+      :n "C-M-o" 'turn-on-olivetti-mode)
 
 ;; (defun org-yt-follow-mpv (video-id)
 ;;   "Open youtube with VIDEO-ID."
@@ -277,6 +331,17 @@ Welcome to my doom emacs config. I'm using literate programming because it allow
 
 #+END_SRC
 
+** Custom Org Markers
+#+BEGIN_SRC elisp :tangle no
+
+(defface my-redspeak-org-face
+  '((t (:inherit org-macro)))
+  :group 'org-faces)
+
+()
+
+#+END_SRC
+
 * Org Roam
 
 #+BEGIN_SRC elisp
@@ -300,11 +365,17 @@ Welcome to my doom emacs config. I'm using literate programming because it allow
         org-roam-server-port 8080
         org-roam-server-export-inline-images t
         org-roam-server-authenticate nil
+        org-roam-server-serve-files t
         org-roam-server-network-label-truncate t
         org-roam-server-network-label-truncate-length 60
         org-roam-server-network-label-wrap-length 20))
 
 (add-hook! org-roam-mode org-roam-server-mode t)
+#+END_SRC
+* Zen Mode
+#+BEGIN_SRC elisp
+(setq +zen-text-scale 1.5)
+;; (setq writeroom-global-effects writeroom-set-menu-bar-lines writeroom-set-tool-bar-lines writeroom-set-vertical-scroll-bars writeroom-set-bottom-divider-width)
 #+END_SRC
 
 * Elfeed
@@ -410,6 +481,7 @@ Welcome to my doom emacs config. I'm using literate programming because it allow
 (setq   mu4e-maildir-shortcuts
     '((:maildir "/office/Archive"               :key ?a)
      (:maildir "/office/INBOX"                  :key ?i)
+     (:maildir "/outlook/INBOX"                 :key ?l)
      (:maildir "/office/Junk Email"             :key ?j)
      (:maildir "/office/INBOX/Website Forms"    :key ?f)
      (:maildir "/gmail/INBOX"                   :key ?g)
@@ -418,18 +490,20 @@ Welcome to my doom emacs config. I'm using literate programming because it allow
 (add-hook! 'mu4e-view-mode-hook evil-normal-state)
 
 
-;; (use-package! mu4e-views
-;;   :after mu4e
-;;   :defer nil
-;;   :config
-;;   (setq mu4e-views-completion-method 'ivy) ;; use ivy for completion
-;;   (setq mu4e-views-default-view-method "html") ;; make xwidgets default
-;;   (mu4e-views-mu4e-use-view-msg-method "html") ;; select the default
-;;   (setq mu4e-views-next-previous-message-behaviour 'stick-to-current-window)) ;; when pressing n and p stay in the current window
+#+END_SRC
+
+#+BEGIN_SRC elisp
+(use-package! mu4e-views
+  :after mu4e
+  :defer nil
+  :config
+  (setq mu4e-views-completion-method 'ivy) ;; use ivy for completion
+  (setq mu4e-views-default-view-method "html") ;; make xwidgets default
+  (mu4e-views-mu4e-use-view-msg-method "html") ;; select the default
+  (setq mu4e-views-next-previous-message-behaviour 'stick-to-current-window)) ;; when pressing n and p stay in the current window
 
 (map! :map mu4e-headers-mode-map
       :n "H" #'mu4e-views-mu4e-select-view-msg-method)
-
 #+END_SRC
 * Misc
 #+BEGIN_SRC elisp
@@ -441,8 +515,38 @@ Welcome to my doom emacs config. I'm using literate programming because it allow
 
 
 ;; Make Emacs transparent
-(set-frame-parameter (selected-frame) 'alpha '(70 70))
-(add-to-list 'default-frame-alist '(alpha 70 70))
+(set-frame-parameter (selected-frame) 'alpha '(100 100))
+(add-to-list 'default-frame-alist '(alpha 100 100))
+
+#+END_SRC
+
+* Completion
+** SELECTRUM
+#+BEGIN_SRC elisp :tangle no
+(selectrum-mode +1)
+
+;; to make sorting and filtering more intelligent
+(selectrum-prescient-mode +1)
+
+;; to save your command history on disk, so the sorting gets more
+;; intelligent over time
+(prescient-persist-mode +1)
+
+;; enable company use of prescient
+(company-prescient-mode +1)
+#+END_SRC
+
+** IVY
+#+BEGIN_SRC elisp :tangle yes
+;; Using counsel-linux-app for app launcher
+(custom-set-variables '(counsel-linux-app-format-function #'counsel-linux-app-format-function-name-first))
+(setq +ivy-buffer-preview t)
+#+END_SRC
+
+** HELM
+#+BEGIN_SRC elisp :tangle no
+;; Helm
+(setq helm-display-buffer-default-width 100)
 #+END_SRC
 * Tramp
 Tramp for ZSH
