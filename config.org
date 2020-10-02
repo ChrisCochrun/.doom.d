@@ -25,7 +25,7 @@ Welcome to my doom emacs config. I'm using literate programming because it allow
 ;;       doom-variable-pitch-font (font-spec :family "sans" :size 13))
 
 (setq doom-font (font-spec :family "VictorMono Nerd Font" :size 12.0 :weight 'semi-bold)
-      doom-variable-pitch-font (font-spec :family "Noto Sans" :size 13.0 :weight 'semi-bold))
+      doom-variable-pitch-font (font-spec :family "NotoSans Nerd Font" :size 13.0 :weight 'light))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -67,17 +67,6 @@ Welcome to my doom emacs config. I'm using literate programming because it allow
 
 (setq-default delete-by-moving-to-trash t
               tab-width 4)
-
-;; QT/QML
-;; Ensure qml is added to the completion engine company
-(add-to-list 'company-backends 'company-qml)
-
-(setq company-qml-extra-qmltypes-files '("/home/chris/.Felgo/Felgo/gcc_64/import/VPlayPlugins/vplayplugins.qmltypes"
-                                         "/home/chris/.Felgo/Felgo/gcc_64/import/VPlayApps/vplayapps.qmltypes"
-                                         "/home/chris/.Felgo/Felgo/gcc_64/import/VPlay/vplay.qmltypes"
-                                         "/home/chris/.Felgo/Felgo/gcc_64/import/Felgo/felgo.qmltypes"
-                                         "/home/chris/.Felgo/Felgo/gcc_64/qml"))
-
 ;; gdscript
 (require 'gdscript-mode)
 
@@ -105,147 +94,10 @@ LF UTF-8 is the default file encoding. So it's not worth showing in the modeline
 
 (add-hook 'after-change-major-mode-hook #'doom-modeline-conditional-buffer-encoding)
 #+END_SRC
-
-* EXWM
-:PROPERTIES:
-:header-args: :tangle no
-:END:
-
-Through the power of Org-Mode we can turn this off and on depending on if the next time Emacs is launched I want it to be my window manager.
-
-When using exwm, the loading process looks nicer if we set it to launch fullscreen at first.
+* Doom Dashboard
 #+BEGIN_SRC elisp
-(set-frame-parameter nil 'fullscreen 'fullboth)
-#+END_SRC
-
-Also, we need a way to display the time.
-#+BEGIN_SRC elisp
-(display-time-mode t)
-(setq display-time-interval 10)
-(setq display-time-format "%a %b %e, %l:%M %p")
-#+END_SRC
-
-#+BEGIN_SRC elisp
-(require 'exwm)
-(require 'exwm-config)
-(exwm-config-default)
-(require 'exwm-randr)
-(setq exwm-randr-workspace-monitor-plist '(0 "DVI-D-0" 1 "HDMI-0"))
-(add-hook! 'exwm-randr-screen-change-hook
-  (lambda ()
-    (start-process-shell-command
-     "xrandr" nil "xrandr --output DVI-D-0 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output HDMI-0 --mode 1600x900 --pos 1920x0 --rotate normal")))
-(exwm-randr-enable)
-(require 'exwm-systemtray)
-(exwm-systemtray-enable)
-(setq exwm-systemtray-height 18)
-(setq exwm-systemtray-icon-gap 6)
-(setq exwm-workspace-number 8)
-(setq exwm-workspace-show-all-buffers t)
-
-(defun exwm-workspace-next ()
-  "Move forward one workspace."
-  (interactive)
-  (if (< exwm-workspace-current-index (1- exwm-workspace-number))
-      (exwm-workspace-switch (1+ exwm-workspace-current-index))
-    (message "No next workspace.")))
-
-(defun exwm-workspace-prev ()
-  "Move to the previous workspace."
-  (interactive)
-  (if (> exwm-workspace-current-index 0)
-      (exwm-workspace-switch (1- exwm-workspace-current-index))
-    (message "No previous workspace.")))
-
-(defun exwm-flameshot ()
-  "Take a screenshot using flameshot"
-  (interactive)
-  (shell-command "flameshot gui"))
-
-(defun exwm-rofi ()
-  "use rofi to launch programs"
-  (interactive)
-  (shell-command "/home/chris/.dotfiles/rofi/launchers-git/launcher.sh"))
-
-;;Global keybindings
-(setq exwm-input-global-keys
-          `(
-            ;; 's-r': Reset (to line-mode).
-            ([?\s-r] . exwm-reset)
-            ;; 's-w': Switch workspace.
-            ([?\s-w] . exwm-workspace-switch)
-            ([?\s-j] . exwm-workspace-prev)
-            ([?\s-k] . exwm-workspace-next)
-            ;; Switch Buffer
-            ([?\s-b] . +ivy/switch-buffer)
-            ([?\s-m] . exwm-workspace-move-window)
-            ;; close app
-            ([?\s-c] . kill-this-buffer)
-            ;; screenshot
-            ([print] . exwm-flameshot)
-            ;; 's-&': Launch application.
-            ([?\s-r] . (lambda (command)
-                         (interactive (list (read-shell-command "$ ")))
-                         (start-process-shell-command command nil command)))
-            ([menu] . counsel-linux-app)
-            ;; 's-N': Switch to certain workspace.
-            ,@(mapcar (lambda (i)
-                        `(,(kbd (format "s-%d" i)) .
-                          (lambda ()
-                            (interactive)
-                            (exwm-workspace-switch-create ,i))))
-                      (number-sequence 0 9))))
-
-(setq exwm-floating-border-width 0)
-(setq exwm-manage-configurations '(((or (string-match-p "libreoffice"
-                                                   exwm-class-name)
-                                   (string= exwm-class-name "MuseScore3")
-                                   (string= exwm-class-name "Gimp")
-                                   (string= exwm-class-name "mpv")
-                                   (string= exwm-title "Event Tester"))
-                               floating t
-                               floating-mode-line nil
-                               )))
-
-
-(start-process-shell-command "xset" nil "xset r rate 220 90")
-(start-process-shell-command "fehwall" nil "feh --bg-fill ~/Pictures/wallpapers/RoyalKing.png")
-(start-process-shell-command "picom" nil "picom")
-(start-process-shell-command "flameshot" nil "flameshot")
-(start-process-shell-command "nextcloud" nil "nextcloud")
-(start-process-shell-command "caffeine" nil "caffeine")
-(start-process-shell-command "kdeconnect-indicator" nil "kdeconnect-indicator")
-
-#+END_SRC
-
-Make sure that Ivy's posframe loads above exwm windows
-#+BEGIN_SRC elisp
-(setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
-(defun +ivy-posframe-display-exwm (str)
-  (ivy-posframe--display str
-   (lambda (info)
-     (let* ((workarea (elt exwm-workspace--workareas exwm-workspace-current-index))
-            (x (aref workarea 0))
-            (y (aref workarea 1))
-
-            (fw (aref workarea 2))
-            (fh (aref workarea 3))
-
-            (pw (plist-get info :posframe-width))
-            (ph (plist-get info :posframe-height)))
-
-       (cons (+ x (/ (- fw pw) 2)) (+ y (/ (- fh ph) 2)))))))
-
-(setq ivy-posframe-display-functions-alist
-      '((t . +ivy-posframe-display-exwm))
-
-      ivy-posframe-parameters '((parent-frame nil)
-                                (z-group . above)))
-
-;; force set frame-position on every posframe display
-(advice-add 'posframe--set-frame-position :before
-            (lambda (&rest args)
-              (setq-local posframe--last-posframe-pixel-position nil)))
+(setq +doom-dashboard-banner-dir "/home/chris/.doom.d/banner/")
+(setq +doom-dashboard-banner-file "whitelionsmall.png")
 #+END_SRC
 
 * Org Mode
@@ -260,8 +112,14 @@ Make sure that Ivy's posframe loads above exwm windows
 
 (add-hook! 'org-mode-hook (lambda () (imenu-add-to-menubar "Imenu")))
 
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "PROJ(p)" "STRT(s)" "WAIT(w)" "HOLD(h)" "|" "DONE(d)" "CNCL(c)")
+ (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
+
+
 ;; (add-hook! org-mode (olivetti-mode t))
-(add-hook! org-mode (org-autolist-mode t))
+;; (add-hook! org-mode (org-autolist-mode t))
+(add-hook! org-mode (toc-org-mode t))
 
 (map! :map org-mode-map
       :n "M-<tab>" 'org-show-subtree
@@ -333,21 +191,27 @@ Make sure that Ivy's posframe loads above exwm windows
 
 ** Custom Org Markers
 #+BEGIN_SRC elisp :tangle no
+(defun org-add-my-extra-markup ()
+  "Add highlight emphasis."
+  (add-to-list 'org-font-lock-extra-keywords
+               '("[^\\w]\\(:\\[^\n\r\t]+:\\)[^\\w]"
+                 (1 '(face highlight invisible nil)))))
 
-(defface my-redspeak-org-face
-  '((t (:inherit org-macro)))
-  :group 'org-faces)
-
-()
-
+(add-hook 'org-font-lock-set-keywords-hook #'org-add-my-extra-markup)
 #+END_SRC
 
 * Org Roam
 
+Basic Org-Roam setup. We select the directory and the basic width of the Org-Roam buffer so that it fits right.
 #+BEGIN_SRC elisp
 ;; Org-Roam
 (setq org-roam-directory "~/org")
 (setq org-roam-buffer-width 0.25)
+#+END_SRC
+
+Capture templates specific to Org-Roam which is particularly based around notes.
+#+BEGIN_SRC elisp
+
 (setq org-roam-capture-templates
       '(("d" "default" plain (function org-roam--capture-get-point)
          "%?"
@@ -358,8 +222,21 @@ Make sure that Ivy's posframe loads above exwm windows
          :file-name "${slug}"
          :head "#+TITLE: ${title}\n#+AUTHOR: Chris Cochrun\n#+CREATED: %<%D - %I:%M %p>\n- tags %^G\n\n* ")))
 
+(setq org-roam-dailies-capture-templates
+      '(("d" "daily" plain #'org-roam-capture--get-point ""
+        :immediate-finish t
+        :file-name "%<%m-%d-%Y>"
+        :head "#+TITLE: %<%m-%d-%Y>\n#+AUTHOR: Chris Cochrun mailto://chris@tfcconnection.org\n#+CREATED: %<%D - %I:%M %p>\n\n* HFL\n* Tasks\n* Family\n** How Do I Love Abbie?")
+        ("b" "biblical daily" plain #'org-roam-capture--get-point ""
+         :immediate-finish t
+        :file-name "%<%m-%d-%Y>-bib"
+        :head "#+TITLE: %<%m-%d-%Y> - Biblical\n#+AUTHOR: Chris Cochrun mailto://chris@tfcconnection.org")))
+
+#+END_SRC
+
+Org-Roam server. This let's me visualize my notes.
+#+BEGIN_SRC elisp
 (use-package! org-roam-server
-  :ensure t
   :config
   (setq org-roam-server-host "127.0.0.1"
         org-roam-server-port 8080
@@ -372,28 +249,26 @@ Make sure that Ivy's posframe loads above exwm windows
 
 (add-hook! org-roam-mode org-roam-server-mode t)
 #+END_SRC
+
 * Zen Mode
-#+BEGIN_SRC elisp
-(setq +zen-text-scale 1.5)
+#+BEGIN_SRC elisp :tangle no
+;; (setq +zen-text-scale 1.5)
 ;; (setq writeroom-global-effects writeroom-set-menu-bar-lines writeroom-set-tool-bar-lines writeroom-set-vertical-scroll-bars writeroom-set-bottom-divider-width)
 #+END_SRC
 
 * Elfeed
 
 #+BEGIN_SRC elisp
-
-
 ;; elfeed
 (map! :leader "o F" 'elfeed)
 
 ;; Make elfeed update when opened
 (add-hook! 'elfeed-search-mode-hook 'elfeed-update)
 
-
 ;; function to launch mpv from elfeed
 (defun elfeed-v-mpv (url)
   "Watch a video from URL in MPV"
-  (async-shell-command (format "mpv %s" url)))
+  (emms-add-url url))
 
 (defun elfeed-view-mpv (&optional use-generic-p)
   "Youtube-feed link"
@@ -408,8 +283,9 @@ Make sure that Ivy's posframe loads above exwm windows
 
 ;; function to launch mpv from elfeed
 (defun elfeed-a-mpv (url)
-  "Watch a video from URL in MPV"
-  (async-shell-command (format "mpv --no-audio-display %s" url)))
+  "Watch a video from URL in MPV
+This creates a new mpv video from the url passed to it."
+  (async-shell-command (format "mpv --prefetch-playlist=yes --no-audio-display --playlist-start=auto %s" url)))
 
 (defun elfeed-view-mpv-audio (&optional use-generic-p)
   "Youtube-feed link"
@@ -429,19 +305,36 @@ Make sure that Ivy's posframe loads above exwm windows
 
 
 #+END_SRC
+* EMMS
+#+BEGIN_SRC elisp
+(map! :leader "o M" 'emms)
+(require 'emms-setup)
+(emms-all)
+(emms-default-players)
+#+END_SRC
 
+#+BEGIN_SRC elisp
+(map! :leader "P" 'emms-pause)
+#+END_SRC
 * Mu4e
 
 #+BEGIN_SRC elisp
-
-
-;; Email
-
 ;; Add gmail
 (set-email-account! "gmail"
   '((mu4e-sent-folder       . "/gmail/[Gmail].Sent Mail/")
     (smtpmail-smtp-user     . "ccochrun21@gmail.com")
     (user-mail-address      . "ccochrun21@gmail.com")    ;; only needed for mu < 1.4
+    (mu4e-compose-signature . "---\nChris Cochrun"))
+  nil)
+
+;; Add personal outlook account
+(set-email-account! "office365"
+  '((mu4e-sent-folder       . "/outlook/Sent")
+    (mu4e-drafts-folder     . "/outlook/Drafts")
+    (mu4e-trash-folder      . "/outlook/Deleted")
+    (mu4e-refile-folder     . "/outlook/Archive")
+    (smtpmail-smtp-user     . "chris.cochrun@outlook.com")
+    (user-mail-address      . "chris.cochrun@outlook.com")    ;; only needed for mu < 1.4
     (mu4e-compose-signature . "---\nChris Cochrun"))
   nil)
 
@@ -456,17 +349,6 @@ Make sure that Ivy's posframe loads above exwm windows
     (mu4e-compose-signature . "---\nChris Cochrun"))
   t)
 
-;; Add personal outlook account
-(set-email-account! "office365"
-  '((mu4e-sent-folder       . "/outlook/Sent")
-    (mu4e-drafts-folder     . "/outlook/Drafts")
-    (mu4e-trash-folder      . "/outlook/Deleted")
-    (mu4e-refile-folder     . "/outlook/Archive")
-    (smtpmail-smtp-user     . "chris.cochrun@outlook.com")
-    (user-mail-address      . "chris.cochrun@outlook.com")    ;; only needed for mu < 1.4
-    (mu4e-compose-signature . "---\nChris Cochrun"))
-  t)
-
 ;; Add the ability to send email for o365
 (setq message-send-mail-function 'smtpmail-send-it
    starttls-use-gnutls t
@@ -478,7 +360,7 @@ Make sure that Ivy's posframe loads above exwm windows
    smtpmail-smtp-service 587)
 
 ;; shortcuts in the jumplist by pressing "J" in the mu4e buffer
-(setq   mu4e-maildir-shortcuts
+(setq mu4e-maildir-shortcuts
     '((:maildir "/office/Archive"               :key ?a)
      (:maildir "/office/INBOX"                  :key ?i)
      (:maildir "/outlook/INBOX"                 :key ?l)
@@ -489,10 +371,32 @@ Make sure that Ivy's posframe loads above exwm windows
 
 (add-hook! 'mu4e-view-mode-hook evil-normal-state)
 
+;; (add-to-list mu4e-headers-actions ("org capture message" . mu4e-org-store-and-capture))
 
+(setq mu4e-bookmarks
+      '((:name "Unread messages"
+         :query "flag:unread AND NOT flag:trashed AND NOT maildir:\"/outlook/Junk\" AND NOT maildir:\"/office/Junk Email\" AND NOT maildir:\"/outlook/Deleted\" AND NOT maildir:\"/office/Deleted Items\""
+         :key 117)
+        (:name "Today's messages" :query "date:today..now" :key 116)
+        (:name "Last 7 days" :query "date:7d..now" :hide-unread t :key 119)
+        (:name "Messages with images" :query "mime:image/*" :key 112)))
 #+END_SRC
 
 #+BEGIN_SRC elisp
+(mu4e-alert-set-default-style 'notifications)
+(add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
+(add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display)
+(setq mu4e-alert-email-notification-types '(count))
+
+(setq mu4e-alert-interesting-mail-query
+      (concat
+       "flag:unread"
+       " AND NOT flag:trashed"
+       " AND NOT maildir:"
+       "\"/outlook/Junk\" AND NOT maildir:\"/office/Junk Email\" AND NOT maildir:\"/outlook/Deleted\" AND NOT maildir:\"/office/Deleted Items\""))
+#+END_SRC
+
+#+BEGIN_SRC elisp :tangle no
 (use-package! mu4e-views
   :after mu4e
   :defer nil
@@ -505,6 +409,96 @@ Make sure that Ivy's posframe loads above exwm windows
 (map! :map mu4e-headers-mode-map
       :n "H" #'mu4e-views-mu4e-select-view-msg-method)
 #+END_SRC
+
+#+BEGIN_SRC elisp :tangle no
+(use-package! mu4e-views :disabled t)
+#+END_SRC
+* Calendar
+#+BEGIN_SRC elisp
+(use-package! calfw
+  :config
+  (defun my-open-calendar ()
+    (interactive)
+    (cfw:open-calendar-buffer
+     :contents-sources
+     (list
+      (cfw:org-create-source "Cyan")  ; org-agenda source
+      (cfw:ical-create-source "NV" "https://www.nvhuskies.org/vnews/display.vical" "Green")  ; School Calendar
+      (cfw:ical-create-source "Outlook" "https://outlook.office365.com/owa/calendar/62a0d491bec4430e825822afd2fd1c01@tfcconnection.org/9acc5bc27ca24ce7a900c57284959f9d8242340735661296952/S-1-8-2197686000-2519837503-3687200543-3873966527/reachcalendar.ics" "Purple")  ; Outlook Calendar
+      ))))
+
+(map! :leader
+      (:prefix ("a" . "Calendar")
+       :desc "Open Calendar" "c" 'my-open-calendar))
+(map! :map cfw:calendar-mode-map
+      "SPC" 'doom/leader
+      "q" 'kill-this-buffer
+      "RET" 'cfw:show-details-command)
+(map! :map cfw:details-mode-map
+      :n "q" 'cfw:details-kill-buffer-command)
+#+END_SRC
+* EShell
+#+BEGIN_SRC elisp
+(setq password-cache t)
+(setq password-cache-expiry 3600)
+
+;;; Extra execution information
+(defvar chris/eshell-status-p t
+  "If non-nil, display status before prompt.")
+(defvar chris/eshell-status--last-command-time nil)
+(make-variable-buffer-local 'chris/eshell-status--last-command-time)
+(defvar chris/eshell-status-min-duration-before-display 0
+  "If a command takes more time than this, display its duration.")
+
+(defun chris/eshell-status-display ()
+  (if chris/eshell-status--last-command-time
+    (let ((duration (time-subtract (current-time) chris/eshell-status--last-command-time)))
+      (setq chris/eshell-status--last-command-time nil)
+      (when (> (time-to-seconds duration) chris/eshell-status-min-duration-before-display)
+        (format "  %.3fs %s"
+                (time-to-seconds duration)
+                (format-time-string "| %F %T" (current-time)))))
+    (format "  0.000s")))
+
+(defun chris/eshell-status-record ()
+  (setq chris/eshell-status--last-command-time (current-time)))
+
+(add-hook 'eshell-pre-command-hook 'chris/eshell-status-record)
+
+(setq eshell-prompt-function
+      (lambda nil
+        (let ((path (abbreviate-file-name (eshell/pwd))))
+          (concat
+           (if (string= system-name "archdesktop")
+               nil
+             (format
+              (propertize "\n(%s@%s)" 'face '(:foreground "#606580"))
+              (propertize (user-login-name) 'face '(:inherit compilation-warning))
+              (propertize (system-name) 'face '(:inherit compilation-warning))))
+           (if (and (require 'magit nil t) (or (magit-get-current-branch) (magit-get-current-tag)))
+               (let* ((root (abbreviate-file-name (magit-rev-parse "--show-toplevel")))
+                      (after-root (substring-no-properties path (min (length path) (1+ (length root))))))
+                 (format
+                  (propertize "\n[ %s | %s@%s ]" 'face font-lock-comment-face)
+                  (propertize root 'face `(:inherit org-warning))
+                  (propertize after-root 'face `(:inherit org-level-1))
+                  (propertize (or (magit-get-current-branch) (magit-get-current-tag)) 'face `(:inherit org-macro))))
+             (format
+              (propertize "\n[%s]" 'face font-lock-comment-face)
+              (propertize path 'face `(:inherit org-level-1))))
+           (when chris/eshell-status-p
+             (propertize (or (chris/eshell-status-display) "") 'face font-lock-comment-face))
+           (propertize "\n" 'face '(:inherit org-todo :weight ultra-bold))
+           " "))))
+
+;;; If the prompt spans over multiple lines, the regexp should match
+;;; last line only.
+(setq-default eshell-prompt-regexp "^ ")
+#+END_SRC
+
+#+RESULTS:
+: ^
+
 * Misc
 #+BEGIN_SRC elisp
 ;; Set Vterm to zsh
@@ -515,11 +509,23 @@ Make sure that Ivy's posframe loads above exwm windows
 
 
 ;; Make Emacs transparent
-(set-frame-parameter (selected-frame) 'alpha '(100 100))
-(add-to-list 'default-frame-alist '(alpha 100 100))
+;; (set-frame-parameter (selected-frame) 'alpha '(100 100))
+;; (add-to-list 'default-frame-alist '(alpha 100 100))
 
 #+END_SRC
 
+QT/QML
+Ensure qml is added to the completion engine company
+#+BEGIN_SRC elisp
+(add-to-list 'company-backends 'company-qml)
+
+(setq company-qml-extra-qmltypes-files '("/home/chris/.Felgo/Felgo/gcc_64/import/VPlayPlugins/vplayplugins.qmltypes"
+                                         "/home/chris/.Felgo/Felgo/gcc_64/import/VPlayApps/vplayapps.qmltypes"
+                                         "/home/chris/.Felgo/Felgo/gcc_64/import/VPlay/vplay.qmltypes"
+                                         "/home/chris/.Felgo/Felgo/gcc_64/import/Felgo/felgo.qmltypes"
+                                         "/home/chris/.Felgo/Felgo/gcc_64/qml"))
+
+#+END_SRC
 * Completion
 ** SELECTRUM
 #+BEGIN_SRC elisp :tangle no
@@ -540,13 +546,161 @@ Make sure that Ivy's posframe loads above exwm windows
 #+BEGIN_SRC elisp :tangle yes
 ;; Using counsel-linux-app for app launcher
 (custom-set-variables '(counsel-linux-app-format-function #'counsel-linux-app-format-function-name-first))
-(setq +ivy-buffer-preview t)
+;; (setq +ivy-buffer-preview t)
 #+END_SRC
 
 ** HELM
 #+BEGIN_SRC elisp :tangle no
 ;; Helm
-(setq helm-display-buffer-default-width 100)
+;; (setq helm-display-buffer-default-width 100)
+#+END_SRC
+* EXWM
+:PROPERTIES:
+:header-args: :tangle no
+:END:
+
+Through the power of Org-Mode we can turn this off and on depending on if the next time Emacs is launched I want it to be my window manager.
+
+When using exwm, the loading process looks nicer if we set it to launch fullscreen at first.
+#+BEGIN_SRC elisp
+(set-frame-parameter nil 'fullscreen 'fullboth)
+#+END_SRC
+
+** MAIN EXWM
+Also, we need a way to display the time.
+#+BEGIN_SRC elisp
+(display-time-mode t)
+(setq display-time-interval 10)
+(setq display-time-format "%a %b %e, %l:%M %p")
+#+END_SRC
+
+#+BEGIN_SRC elisp
+(require 'exwm)
+(require 'exwm-config)
+(exwm-config-example)
+(exwm-enable)
+(require 'exwm-randr)
+(setq exwm-randr-workspace-monitor-plist '(0 "DVI-D-0" 1 "HDMI-0"))
+(add-hook! 'exwm-randr-screen-change-hook
+  (lambda ()
+    (start-process-shell-command
+     "xrandr" nil "xrandr --output DVI-D-0 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output HDMI-0 --mode 1600x900 --pos 1920x0 --rotate normal")))
+(exwm-randr-enable)
+(require 'exwm-systemtray)
+(exwm-systemtray-enable)
+(setq exwm-systemtray-height 18)
+(setq exwm-systemtray-icon-gap 6)
+(setq exwm-workspace-number 8)
+(setq exwm-workspace-show-all-buffers t)
+
+
+(defun exwm-workspace-next ()
+  "Move forward one workspace."
+  (interactive)
+  (if (< exwm-workspace-current-index (1- exwm-workspace-number))
+      (exwm-workspace-switch (1+ exwm-workspace-current-index))
+    (message "No next workspace.")))
+
+(defun exwm-workspace-prev ()
+  "Move to the previous workspace."
+  (interactive)
+  (if (> exwm-workspace-current-index 0)
+      (exwm-workspace-switch (1- exwm-workspace-current-index))
+    (message "No previous workspace.")))
+
+(defun exwm-flameshot ()
+  "Take a screenshot using flameshot"
+  (interactive)
+  (shell-command "flameshot gui"))
+
+(defun exwm-rofi ()
+  "use rofi to launch programs"
+  (interactive)
+  (shell-command "/home/chris/.dotfiles/rofi/launchers-git/launcher.sh"))
+
+;;Global keybindings
+(setq exwm-input-global-keys
+          `(
+            ;; 's-r': Reset (to line-mode).
+            ([?\s-r] . exwm-reset)
+            ;; 's-w': Switch workspace.
+            ([?\s-w] . exwm-workspace-switch)
+            ([?\s-j] . exwm-workspace-prev)
+            ([?\s-k] . exwm-workspace-next)
+            ;; Switch Buffer
+            ([?\s-b] . +ivy/switch-buffer)
+            ([?\s-m] . exwm-workspace-move-window)
+            ;; close app
+            ([?\s-c] . kill-this-buffer)
+            ;; screenshot
+            ([print] . exwm-flameshot)
+            ;; 's-&': Launch application.
+            ([?\s-r] . (lambda (command)
+                         (interactive (list (read-shell-command "$ ")))
+                         (start-process-shell-command command nil command)))
+            ([menu] . counsel-linux-app)
+            ;; 's-N': Switch to certain workspace.
+            ,@(mapcar (lambda (i)
+                        `(,(kbd (format "s-%d" i)) .
+                          (lambda ()
+                            (interactive)
+                            (exwm-workspace-switch-create ,i))))
+                      (number-sequence 0 9))))
+
+(setq exwm-floating-border-width 0)
+(setq exwm-manage-configurations '(((or (string-match-p "libreoffice"
+                                                   exwm-class-name)
+                                   (string= exwm-class-name "MuseScore3")
+                                   (string= exwm-class-name "Gimp")
+                                   (string= exwm-class-name "mpv")
+                                   (string= exwm-title "Event Tester"))
+                               floating t
+                               floating-mode-line nil
+                               )))
+
+#+END_SRC
+
+
+** AUTO-START
+#+BEGIN_SRC elisp
+(start-process-shell-command "xset" nil "xset r rate 220 90")
+(start-process-shell-command "fehwall" nil "feh --bg-fill ~/Pictures/wallpapers/RoyalKing.png")
+(start-process-shell-command "picom" nil "picom")
+(start-process-shell-command "flameshot" nil "flameshot")
+;; (start-process-shell-command "nextcloud" nil "nextcloud")
+(start-process-shell-command "caffeine" nil "caffeine")
+(start-process-shell-command "kdeconnect-indicator" nil "kdeconnect-indicator")
+#+END_SRC
+
+** IVY SPECIFIC
+Make sure that Ivy's posframe loads above exwm windows
+#+BEGIN_SRC elisp :tangle no
+(setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
+(defun +ivy-posframe-display-exwm (str)
+  (ivy-posframe--display str
+   (lambda (info)
+     (let* ((workarea (elt exwm-workspace--workareas exwm-workspace-current-index))
+            (x (aref workarea 0))
+            (y (aref workarea 1))
+
+            (fw (aref workarea 2))
+            (fh (aref workarea 3))
+
+            (pw (plist-get info :posframe-width))
+            (ph (plist-get info :posframe-height)))
+
+       (cons (+ x (/ (- fw pw) 2)) (+ y (/ (- fh ph) 2)))))))
+
+(setq ivy-posframe-display-functions-alist
+      '((t . +ivy-posframe-display-exwm))
+
+      ivy-posframe-parameters '((parent-frame nil)
+                                (z-group . above)))
+
+;; force set frame-position on every posframe display
+(advice-add 'posframe--set-frame-position :before
+            (lambda (&rest args)
+              (setq-local posframe--last-posframe-pixel-position nil)))
 #+END_SRC
 * Tramp
 Tramp for ZSH
@@ -554,3 +708,5 @@ Needed to allow me to remote to servers using zsh as the main shell
 #+BEGIN_SRC elisp
 (setq tramp-terminal-type "tramp")
 #+END_SRC
+
+

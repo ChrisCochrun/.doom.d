@@ -16,7 +16,7 @@
 ;;       doom-variable-pitch-font (font-spec :family "sans" :size 13))
 
 (setq doom-font (font-spec :family "VictorMono Nerd Font" :size 12.0 :weight 'semi-bold)
-      doom-variable-pitch-font (font-spec :family "Noto Sans" :size 13.0 :weight 'semi-bold))
+      doom-variable-pitch-font (font-spec :family "NotoSans Nerd Font" :size 13.0 :weight 'light))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -58,17 +58,6 @@
 
 (setq-default delete-by-moving-to-trash t
               tab-width 4)
-
-;; QT/QML
-;; Ensure qml is added to the completion engine company
-(add-to-list 'company-backends 'company-qml)
-
-(setq company-qml-extra-qmltypes-files '("/home/chris/.Felgo/Felgo/gcc_64/import/VPlayPlugins/vplayplugins.qmltypes"
-                                         "/home/chris/.Felgo/Felgo/gcc_64/import/VPlayApps/vplayapps.qmltypes"
-                                         "/home/chris/.Felgo/Felgo/gcc_64/import/VPlay/vplay.qmltypes"
-                                         "/home/chris/.Felgo/Felgo/gcc_64/import/Felgo/felgo.qmltypes"
-                                         "/home/chris/.Felgo/Felgo/gcc_64/qml"))
-
 ;; gdscript
 (require 'gdscript-mode)
 
@@ -88,6 +77,9 @@
 
 (add-hook 'after-change-major-mode-hook #'doom-modeline-conditional-buffer-encoding)
 
+(setq +doom-dashboard-banner-dir "/home/chris/.doom.d/banner/")
+(setq +doom-dashboard-banner-file "whitelionsmall.png")
+
 ;; org
 (setq org-superstar-headline-bullets-list '("◉" "◈" "▸" "◎" "✬" "◇" "❉" "✙" "❖"))
 (setq olivetti-body-width 0.6)
@@ -96,8 +88,14 @@
 
 (add-hook! 'org-mode-hook (lambda () (imenu-add-to-menubar "Imenu")))
 
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "PROJ(p)" "STRT(s)" "WAIT(w)" "HOLD(h)" "|" "DONE(d)" "CNCL(c)")
+ (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
+
+
 ;; (add-hook! org-mode (olivetti-mode t))
-(add-hook! org-mode (org-autolist-mode t))
+;; (add-hook! org-mode (org-autolist-mode t))
+(add-hook! org-mode (toc-org-mode t))
 
 (map! :map org-mode-map
       :n "M-<tab>" 'org-show-subtree
@@ -168,6 +166,7 @@
 ;; Org-Roam
 (setq org-roam-directory "~/org")
 (setq org-roam-buffer-width 0.25)
+
 (setq org-roam-capture-templates
       '(("d" "default" plain (function org-roam--capture-get-point)
          "%?"
@@ -178,8 +177,17 @@
          :file-name "${slug}"
          :head "#+TITLE: ${title}\n#+AUTHOR: Chris Cochrun\n#+CREATED: %<%D - %I:%M %p>\n- tags %^G\n\n* ")))
 
+(setq org-roam-dailies-capture-templates
+      '(("d" "daily" plain #'org-roam-capture--get-point ""
+        :immediate-finish t
+        :file-name "%<%m-%d-%Y>"
+        :head "#+TITLE: %<%m-%d-%Y>\n#+AUTHOR: Chris Cochrun mailto://chris@tfcconnection.org\n#+CREATED: %<%D - %I:%M %p>\n\n* HFL\n* Tasks\n* Family\n** How Do I Love Abbie?")
+        ("b" "biblical daily" plain #'org-roam-capture--get-point ""
+         :immediate-finish t
+        :file-name "%<%m-%d-%Y>-bib"
+        :head "#+TITLE: %<%m-%d-%Y> - Biblical\n#+AUTHOR: Chris Cochrun mailto://chris@tfcconnection.org")))
+
 (use-package! org-roam-server
-  :ensure t
   :config
   (setq org-roam-server-host "127.0.0.1"
         org-roam-server-port 8080
@@ -192,20 +200,16 @@
 
 (add-hook! org-roam-mode org-roam-server-mode t)
 
-(setq +zen-text-scale 1.5)
-;; (setq writeroom-global-effects writeroom-set-menu-bar-lines writeroom-set-tool-bar-lines writeroom-set-vertical-scroll-bars writeroom-set-bottom-divider-width)
-
 ;; elfeed
 (map! :leader "o F" 'elfeed)
 
 ;; Make elfeed update when opened
 (add-hook! 'elfeed-search-mode-hook 'elfeed-update)
 
-
 ;; function to launch mpv from elfeed
 (defun elfeed-v-mpv (url)
   "Watch a video from URL in MPV"
-  (async-shell-command (format "mpv %s" url)))
+  (emms-add-url url))
 
 (defun elfeed-view-mpv (&optional use-generic-p)
   "Youtube-feed link"
@@ -220,8 +224,9 @@
 
 ;; function to launch mpv from elfeed
 (defun elfeed-a-mpv (url)
-  "Watch a video from URL in MPV"
-  (async-shell-command (format "mpv --no-audio-display %s" url)))
+  "Watch a video from URL in MPV
+This creates a new mpv video from the url passed to it."
+  (async-shell-command (format "mpv --prefetch-playlist=yes --no-audio-display --playlist-start=auto %s" url)))
 
 (defun elfeed-view-mpv-audio (&optional use-generic-p)
   "Youtube-feed link"
@@ -239,13 +244,29 @@
       :n "v" 'elfeed-view-mpv
       :n "a" 'elfeed-view-mpv-audio)
 
-;; Email
+(map! :leader "o M" 'emms)
+(require 'emms-setup)
+(emms-all)
+(emms-default-players)
+
+(map! :leader "P" 'emms-pause)
 
 ;; Add gmail
 (set-email-account! "gmail"
   '((mu4e-sent-folder       . "/gmail/[Gmail].Sent Mail/")
     (smtpmail-smtp-user     . "ccochrun21@gmail.com")
     (user-mail-address      . "ccochrun21@gmail.com")    ;; only needed for mu < 1.4
+    (mu4e-compose-signature . "---\nChris Cochrun"))
+  nil)
+
+;; Add personal outlook account
+(set-email-account! "office365"
+  '((mu4e-sent-folder       . "/outlook/Sent")
+    (mu4e-drafts-folder     . "/outlook/Drafts")
+    (mu4e-trash-folder      . "/outlook/Deleted")
+    (mu4e-refile-folder     . "/outlook/Archive")
+    (smtpmail-smtp-user     . "chris.cochrun@outlook.com")
+    (user-mail-address      . "chris.cochrun@outlook.com")    ;; only needed for mu < 1.4
     (mu4e-compose-signature . "---\nChris Cochrun"))
   nil)
 
@@ -260,17 +281,6 @@
     (mu4e-compose-signature . "---\nChris Cochrun"))
   t)
 
-;; Add personal outlook account
-(set-email-account! "office365"
-  '((mu4e-sent-folder       . "/outlook/Sent")
-    (mu4e-drafts-folder     . "/outlook/Drafts")
-    (mu4e-trash-folder      . "/outlook/Deleted")
-    (mu4e-refile-folder     . "/outlook/Archive")
-    (smtpmail-smtp-user     . "chris.cochrun@outlook.com")
-    (user-mail-address      . "chris.cochrun@outlook.com")    ;; only needed for mu < 1.4
-    (mu4e-compose-signature . "---\nChris Cochrun"))
-  t)
-
 ;; Add the ability to send email for o365
 (setq message-send-mail-function 'smtpmail-send-it
    starttls-use-gnutls t
@@ -282,7 +292,7 @@
    smtpmail-smtp-service 587)
 
 ;; shortcuts in the jumplist by pressing "J" in the mu4e buffer
-(setq   mu4e-maildir-shortcuts
+(setq mu4e-maildir-shortcuts
     '((:maildir "/office/Archive"               :key ?a)
      (:maildir "/office/INBOX"                  :key ?i)
      (:maildir "/outlook/INBOX"                 :key ?l)
@@ -293,17 +303,105 @@
 
 (add-hook! 'mu4e-view-mode-hook evil-normal-state)
 
-(use-package! mu4e-views
-  :after mu4e
-  :defer nil
-  :config
-  (setq mu4e-views-completion-method 'ivy) ;; use ivy for completion
-  (setq mu4e-views-default-view-method "html") ;; make xwidgets default
-  (mu4e-views-mu4e-use-view-msg-method "html") ;; select the default
-  (setq mu4e-views-next-previous-message-behaviour 'stick-to-current-window)) ;; when pressing n and p stay in the current window
+;; (add-to-list mu4e-headers-actions ("org capture message" . mu4e-org-store-and-capture))
 
-(map! :map mu4e-headers-mode-map
-      :n "H" #'mu4e-views-mu4e-select-view-msg-method)
+(setq mu4e-bookmarks
+      '((:name "Unread messages"
+         :query "flag:unread AND NOT flag:trashed AND NOT maildir:\"/outlook/Junk\" AND NOT maildir:\"/office/Junk Email\" AND NOT maildir:\"/outlook/Deleted\" AND NOT maildir:\"/office/Deleted Items\""
+         :key 117)
+        (:name "Today's messages" :query "date:today..now" :key 116)
+        (:name "Last 7 days" :query "date:7d..now" :hide-unread t :key 119)
+        (:name "Messages with images" :query "mime:image/*" :key 112)))
+
+(mu4e-alert-set-default-style 'notifications)
+(add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
+(add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display)
+(setq mu4e-alert-email-notification-types '(count))
+
+(setq mu4e-alert-interesting-mail-query
+      (concat
+       "flag:unread"
+       " AND NOT flag:trashed"
+       " AND NOT maildir:"
+       "\"/outlook/Junk\" AND NOT maildir:\"/office/Junk Email\" AND NOT maildir:\"/outlook/Deleted\" AND NOT maildir:\"/office/Deleted Items\""))
+
+(use-package! calfw
+  :config
+  (defun my-open-calendar ()
+    (interactive)
+    (cfw:open-calendar-buffer
+     :contents-sources
+     (list
+      (cfw:org-create-source "Cyan")  ; org-agenda source
+      (cfw:ical-create-source "NV" "https://www.nvhuskies.org/vnews/display.vical" "Green")  ; School Calendar
+      (cfw:ical-create-source "Outlook" "https://outlook.office365.com/owa/calendar/62a0d491bec4430e825822afd2fd1c01@tfcconnection.org/9acc5bc27ca24ce7a900c57284959f9d8242340735661296952/S-1-8-2197686000-2519837503-3687200543-3873966527/reachcalendar.ics" "Purple")  ; Outlook Calendar
+      ))))
+
+(map! :leader
+      (:prefix ("a" . "Calendar")
+       :desc "Open Calendar" "c" 'my-open-calendar))
+(map! :map cfw:calendar-mode-map
+      "SPC" 'doom/leader
+      "q" 'kill-this-buffer
+      "RET" 'cfw:show-details-command)
+(map! :map cfw:details-mode-map
+      :n "q" 'cfw:details-kill-buffer-command)
+
+(setq password-cache t)
+(setq password-cache-expiry 3600)
+
+;;; Extra execution information
+(defvar chris/eshell-status-p t
+  "If non-nil, display status before prompt.")
+(defvar chris/eshell-status--last-command-time nil)
+(make-variable-buffer-local 'chris/eshell-status--last-command-time)
+(defvar chris/eshell-status-min-duration-before-display 0
+  "If a command takes more time than this, display its duration.")
+
+(defun chris/eshell-status-display ()
+  (if chris/eshell-status--last-command-time
+    (let ((duration (time-subtract (current-time) chris/eshell-status--last-command-time)))
+      (setq chris/eshell-status--last-command-time nil)
+      (when (> (time-to-seconds duration) chris/eshell-status-min-duration-before-display)
+        (format "  %.3fs %s"
+                (time-to-seconds duration)
+                (format-time-string "| %F %T" (current-time)))))
+    (format "  0.000s")))
+
+(defun chris/eshell-status-record ()
+  (setq chris/eshell-status--last-command-time (current-time)))
+
+(add-hook 'eshell-pre-command-hook 'chris/eshell-status-record)
+
+(setq eshell-prompt-function
+      (lambda nil
+        (let ((path (abbreviate-file-name (eshell/pwd))))
+          (concat
+           (if (string= system-name "archdesktop")
+               nil
+             (format
+              (propertize "\n(%s@%s)" 'face '(:foreground "#606580"))
+              (propertize (user-login-name) 'face '(:inherit compilation-warning))
+              (propertize (system-name) 'face '(:inherit compilation-warning))))
+           (if (and (require 'magit nil t) (or (magit-get-current-branch) (magit-get-current-tag)))
+               (let* ((root (abbreviate-file-name (magit-rev-parse "--show-toplevel")))
+                      (after-root (substring-no-properties path (min (length path) (1+ (length root))))))
+                 (format
+                  (propertize "\n[ %s | %s@%s ]" 'face font-lock-comment-face)
+                  (propertize root 'face `(:inherit org-warning))
+                  (propertize after-root 'face `(:inherit org-level-1))
+                  (propertize (or (magit-get-current-branch) (magit-get-current-tag)) 'face `(:inherit org-macro))))
+             (format
+              (propertize "\n[%s]" 'face font-lock-comment-face)
+              (propertize path 'face `(:inherit org-level-1))))
+           (when chris/eshell-status-p
+             (propertize (or (chris/eshell-status-display) "") 'face font-lock-comment-face))
+           (propertize "\n" 'face '(:inherit org-todo :weight ultra-bold))
+           " "))))
+
+;;; If the prompt spans over multiple lines, the regexp should match
+;;; last line only.
+(setq-default eshell-prompt-regexp "^ ")
 
 ;; Set Vterm to zsh
 (setq vterm-shell "/bin/fish")
@@ -313,11 +411,19 @@
 
 
 ;; Make Emacs transparent
-(set-frame-parameter (selected-frame) 'alpha '(100 100))
-(add-to-list 'default-frame-alist '(alpha 100 100))
+;; (set-frame-parameter (selected-frame) 'alpha '(100 100))
+;; (add-to-list 'default-frame-alist '(alpha 100 100))
+
+(add-to-list 'company-backends 'company-qml)
+
+(setq company-qml-extra-qmltypes-files '("/home/chris/.Felgo/Felgo/gcc_64/import/VPlayPlugins/vplayplugins.qmltypes"
+                                         "/home/chris/.Felgo/Felgo/gcc_64/import/VPlayApps/vplayapps.qmltypes"
+                                         "/home/chris/.Felgo/Felgo/gcc_64/import/VPlay/vplay.qmltypes"
+                                         "/home/chris/.Felgo/Felgo/gcc_64/import/Felgo/felgo.qmltypes"
+                                         "/home/chris/.Felgo/Felgo/gcc_64/qml"))
 
 ;; Using counsel-linux-app for app launcher
 (custom-set-variables '(counsel-linux-app-format-function #'counsel-linux-app-format-function-name-first))
-(setq +ivy-buffer-preview t)
+;; (setq +ivy-buffer-preview t)
 
 (setq tramp-terminal-type "tramp")

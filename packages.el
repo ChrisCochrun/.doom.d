@@ -57,12 +57,16 @@
 (package! org-autolist)
 (package! emms)
 (package! nov)
-(package! mu4e-views)
+;; (package! mu4e-views)
 (package! gdscript-mode
           :recipe (:host github
                    :repo "GDQuest/emacs-gdscript-mode"))
 (package! fennel-mode)
 (package! rg)
+(package! mu4e-alert)
+
+;; (package! helm :disable t)
+;; (package! helm-easymenu :disable t)
 
 
 ;; Experiment with selectrum instead of ivy
