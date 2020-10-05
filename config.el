@@ -437,6 +437,7 @@ This creates a new mpv video from the url passed to it."
 (require 'exwm-config)
 (exwm-config-example)
 (exwm-enable)
+
 (require 'exwm-randr)
 (setq exwm-randr-workspace-monitor-plist '(0 "DVI-D-0" 1 "HDMI-0"))
 (add-hook! 'exwm-randr-screen-change-hook
@@ -444,12 +445,17 @@ This creates a new mpv video from the url passed to it."
     (start-process-shell-command
      "xrandr" nil "xrandr --output DVI-D-0 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output HDMI-0 --mode 1600x900 --pos 1920x0 --rotate normal")))
 (exwm-randr-enable)
+
 (require 'exwm-systemtray)
 (exwm-systemtray-enable)
-(setq exwm-systemtray-height 18)
-(setq exwm-systemtray-icon-gap 6)
-(setq exwm-workspace-number 8)
-(setq exwm-workspace-show-all-buffers t)
+(if (string= system-name "chris-linuxlaptop")
+    (setq exwm-systemtray-height 38
+          exwm-systemtray-icon-gap 12)
+  (setq exwm-systemtray-height 18
+        exwm-systemtray-icon-gap 6))
+
+(setq exwm-workspace-number 8
+      exwm-workspace-show-all-buffers t)
 
 
 (defun chris/exwm-workspace-next ()
@@ -493,7 +499,7 @@ This creates a new mpv video from the url passed to it."
             ;; Launch Dolphin
             ([?\s-d] . chris/exwm-launch-dolphin)
             ;; Launch eshell
-            ([?\s-RET] . +eshell/toggle)
+            ([s-return] . +eshell/toggle)
             ;; screenshot
             ([print] . chris/exwm-flameshot)
             ;; Audio
