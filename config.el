@@ -431,6 +431,7 @@ This creates a new mpv video from the url passed to it."
 (display-time-mode t)
 (setq display-time-interval 60)
 (setq display-time-format "%a %b %e, %l:%M %p")
+(display-battery-mode)
 
 (require 'exwm)
 (require 'exwm-config)
@@ -451,34 +452,29 @@ This creates a new mpv video from the url passed to it."
 (setq exwm-workspace-show-all-buffers t)
 
 
-(defun exwm-workspace-next ()
+(defun chris/exwm-workspace-next ()
   "Move forward one workspace."
   (interactive)
   (if (< exwm-workspace-current-index (1- exwm-workspace-number))
       (exwm-workspace-switch (1+ exwm-workspace-current-index))
     (message "No next workspace.")))
 
-(defun exwm-workspace-prev ()
+(defun chris/exwm-workspace-prev ()
   "Move to the previous workspace."
   (interactive)
   (if (> exwm-workspace-current-index 0)
       (exwm-workspace-switch (1- exwm-workspace-current-index))
     (message "No previous workspace.")))
 
-(defun exwm-flameshot ()
+(defun chris/exwm-flameshot ()
   "Take a screenshot using flameshot"
   (interactive)
   (shell-command "flameshot gui"))
 
-(defun exwm-rofi ()
-  "use rofi to launch programs"
-  (interactive)
-  (shell-command "/home/chris/.dotfiles/rofi/launchers-git/launcher.sh"))
-
 (defun chris/exwm-launch-dolphin ()
   "launch dolphin"
   (interactive)
-  (async-shell-command "dolphin" none "dolphin"))
+  (start-process-shell-command "dolphin" none "dolphin"))
 
 ;;Global keybindings
 (setq exwm-input-global-keys
@@ -487,21 +483,26 @@ This creates a new mpv video from the url passed to it."
             ([?\s-r] . exwm-reset)
             ;; 's-w': Switch workspace.
             ([?\s-w] . exwm-workspace-switch)
-            ([?\s-j] . exwm-workspace-prev)
-            ([?\s-k] . exwm-workspace-next)
+            ([?\s-j] . chris/exwm-workspace-prev)
+            ([?\s-k] . chris/exwm-workspace-next)
             ;; Switch Buffer
             ([?\s-b] . +ivy/switch-buffer)
             ([?\s-m] . exwm-workspace-move-window)
             ;; close app
             ([?\s-c] . kill-this-buffer)
-            ;; Launch Dolphiin
+            ;; Launch Dolphin
             ([?\s-d] . chris/exwm-launch-dolphin)
+            ;; Launch eshell
+            ([?\s-RET] . +eshell/toggle)
             ;; screenshot
-            ([print] . exwm-flameshot)
+            ([print] . chris/exwm-flameshot)
             ;; Audio
             ([XF86AudioRaiseVolume] . desktop-environment-volume-increment)
             ([XF86AudioLowerVolume] . desktop-environment-volume-decrement)
             ([XF86AudioMute] . desktop-environment-toggle-mute)
+            ;; Brightness
+            ([XF86MonBrightnessUp] . desktop-environment-brightness-increment)
+            ([XF86MonBrightnessDown] . desktop-environment-brightness-decrement)
             ;; 's-&': Launch application.
             ([?\s-r] . (lambda (command)
                          (interactive (list (read-shell-command "$ ")))
