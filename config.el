@@ -482,6 +482,9 @@ This creates a new mpv video from the url passed to it."
   (interactive)
   (start-process-shell-command "dolphin" none "dolphin"))
 
+;; microphone commands
+(if (string= system-name "archdesktop") (setq desktop-environment-volume-toggle-microphone-command "amixer -c 2 set Mic toggle"))
+
 ;;Global keybindings
 (setq exwm-input-global-keys
           `(
