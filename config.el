@@ -411,8 +411,8 @@ This creates a new mpv video from the url passed to it."
 
 
 ;; Make Emacs transparent
-;; (set-frame-parameter (selected-frame) 'alpha '(100 100))
-;; (add-to-list 'default-frame-alist '(alpha 100 100))
+(set-frame-parameter (selected-frame) 'alpha '(75 75))
+(add-to-list 'default-frame-alist '(alpha 75 75))
 
 (add-to-list 'company-backends 'company-qml)
 
@@ -425,5 +425,142 @@ This creates a new mpv video from the url passed to it."
 ;; Using counsel-linux-app for app launcher
 (custom-set-variables '(counsel-linux-app-format-function #'counsel-linux-app-format-function-name-first))
 ;; (setq +ivy-buffer-preview t)
+
+(set-frame-parameter nil 'fullscreen 'fullboth)
+
+(display-time-mode t)
+(setq display-time-interval 60)
+(setq display-time-format "%a %b %e, %l:%M %p")
+
+(require 'exwm)
+(require 'exwm-config)
+(exwm-config-example)
+(exwm-enable)
+(require 'exwm-randr)
+(setq exwm-randr-workspace-monitor-plist '(0 "DVI-D-0" 1 "HDMI-0"))
+(add-hook! 'exwm-randr-screen-change-hook
+  (lambda ()
+    (start-process-shell-command
+     "xrandr" nil "xrandr --output DVI-D-0 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output HDMI-0 --mode 1600x900 --pos 1920x0 --rotate normal")))
+(exwm-randr-enable)
+(require 'exwm-systemtray)
+(exwm-systemtray-enable)
+(setq exwm-systemtray-height 18)
+(setq exwm-systemtray-icon-gap 6)
+(setq exwm-workspace-number 8)
+(setq exwm-workspace-show-all-buffers t)
+
+
+(defun exwm-workspace-next ()
+  "Move forward one workspace."
+  (interactive)
+  (if (< exwm-workspace-current-index (1- exwm-workspace-number))
+      (exwm-workspace-switch (1+ exwm-workspace-current-index))
+    (message "No next workspace.")))
+
+(defun exwm-workspace-prev ()
+  "Move to the previous workspace."
+  (interactive)
+  (if (> exwm-workspace-current-index 0)
+      (exwm-workspace-switch (1- exwm-workspace-current-index))
+    (message "No previous workspace.")))
+
+(defun exwm-flameshot ()
+  "Take a screenshot using flameshot"
+  (interactive)
+  (shell-command "flameshot gui"))
+
+(defun exwm-rofi ()
+  "use rofi to launch programs"
+  (interactive)
+  (shell-command "/home/chris/.dotfiles/rofi/launchers-git/launcher.sh"))
+
+(defun chris/exwm-launch-dolphin ()
+  "launch dolphin"
+  (interactive)
+  (async-shell-command "dolphin" none "dolphin"))
+
+;;Global keybindings
+(setq exwm-input-global-keys
+          `(
+            ;; 's-r': Reset (to line-mode).
+            ([?\s-r] . exwm-reset)
+            ;; 's-w': Switch workspace.
+            ([?\s-w] . exwm-workspace-switch)
+            ([?\s-j] . exwm-workspace-prev)
+            ([?\s-k] . exwm-workspace-next)
+            ;; Switch Buffer
+            ([?\s-b] . +ivy/switch-buffer)
+            ([?\s-m] . exwm-workspace-move-window)
+            ;; close app
+            ([?\s-c] . kill-this-buffer)
+            ;; Launch Dolphiin
+            ([?\s-d] . chris/exwm-launch-dolphin)
+            ;; screenshot
+            ([print] . exwm-flameshot)
+            ;; Audio
+            ([XF86AudioRaiseVolume] . desktop-environment-volume-increment)
+            ([XF86AudioLowerVolume] . desktop-environment-volume-decrement)
+            ([XF86AudioMute] . desktop-environment-toggle-mute)
+            ;; 's-&': Launch application.
+            ([?\s-r] . (lambda (command)
+                         (interactive (list (read-shell-command "$ ")))
+                         (start-process-shell-command command nil command)))
+            ([menu] . counsel-linux-app)
+            ;; 's-N': Switch to certain workspace.
+            ,@(mapcar (lambda (i)
+                        `(,(kbd (format "s-%d" i)) .
+                          (lambda ()
+                            (interactive)
+                            (exwm-workspace-switch-create ,i))))
+                      (number-sequence 0 9))))
+
+(setq exwm-floating-border-width 0)
+(setq exwm-manage-configurations '(((or (string-match-p "libreoffice"
+                                                   exwm-class-name)
+                                   (string= exwm-class-name "MuseScore3")
+                                   (string= exwm-class-name "Gimp")
+                                   (string= exwm-class-name "mpv")
+                                   (string= exwm-class-name "feh")
+                                   (string= exwm-class-name "dolphin")
+                                   (string= exwm-title "Event Tester"))
+                               floating t
+                               floating-mode-line nil
+                               )))
+
+(start-process-shell-command "xset" nil "xset r rate 220 90")
+(start-process-shell-command "fehwall" nil "feh --bg-fill ~/Pictures/wallpapers/RoyalKing.png")
+(start-process-shell-command "picom" nil "picom")
+(start-process-shell-command "flameshot" nil "flameshot")
+(start-process-shell-command "nextcloud" nil "nextcloud")
+(start-process-shell-command "caffeine" nil "caffeine")
+(start-process-shell-command "kdeconnect-indicator" nil "kdeconnect-indicator")
+
+(setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
+(defun +ivy-posframe-display-exwm (str)
+  (ivy-posframe--display str
+   (lambda (info)
+     (let* ((workarea (elt exwm-workspace--workareas exwm-workspace-current-index))
+            (x (aref workarea 0))
+            (y (aref workarea 1))
+
+            (fw (aref workarea 2))
+            (fh (aref workarea 3))
+
+            (pw (plist-get info :posframe-width))
+            (ph (plist-get info :posframe-height)))
+
+       (cons (+ x (/ (- fw pw) 2)) (+ y (/ (- fh ph) 2)))))))
+
+(setq ivy-posframe-display-functions-alist
+      '((t . +ivy-posframe-display-exwm))
+
+      ivy-posframe-parameters '((parent-frame nil)
+                                (z-group . above)))
+
+;; force set frame-position on every posframe display
+(advice-add 'posframe--set-frame-position :before
+            (lambda (&rest args)
+              (setq-local posframe--last-posframe-pixel-position nil)))
 
 (setq tramp-terminal-type "tramp")

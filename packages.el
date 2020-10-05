@@ -64,6 +64,7 @@
 (package! fennel-mode)
 (package! rg)
 (package! mu4e-alert)
+(package! desktop-environment)
 
 ;; (package! helm :disable t)
 ;; (package! helm-easymenu :disable t)

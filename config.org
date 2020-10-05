@@ -509,8 +509,8 @@ This creates a new mpv video from the url passed to it."
 
 
 ;; Make Emacs transparent
-;; (set-frame-parameter (selected-frame) 'alpha '(100 100))
-;; (add-to-list 'default-frame-alist '(alpha 100 100))
+(set-frame-parameter (selected-frame) 'alpha '(75 75))
+(add-to-list 'default-frame-alist '(alpha 75 75))
 
 #+END_SRC
 
@@ -556,7 +556,7 @@ Ensure qml is added to the completion engine company
 #+END_SRC
 * EXWM
 :PROPERTIES:
-:header-args: :tangle no
+:header-args: :tangle yes
 :END:
 
 Through the power of Org-Mode we can turn this off and on depending on if the next time Emacs is launched I want it to be my window manager.
@@ -570,7 +570,7 @@ When using exwm, the loading process looks nicer if we set it to launch fullscre
 Also, we need a way to display the time.
 #+BEGIN_SRC elisp
 (display-time-mode t)
-(setq display-time-interval 10)
+(setq display-time-interval 60)
 (setq display-time-format "%a %b %e, %l:%M %p")
 #+END_SRC
 
@@ -618,6 +618,11 @@ Also, we need a way to display the time.
   (interactive)
   (shell-command "/home/chris/.dotfiles/rofi/launchers-git/launcher.sh"))
 
+(defun chris/exwm-launch-dolphin ()
+  "launch dolphin"
+  (interactive)
+  (async-shell-command "dolphin" none "dolphin"))
+
 ;;Global keybindings
 (setq exwm-input-global-keys
           `(
@@ -632,8 +637,14 @@ Also, we need a way to display the time.
             ([?\s-m] . exwm-workspace-move-window)
             ;; close app
             ([?\s-c] . kill-this-buffer)
+            ;; Launch Dolphiin
+            ([?\s-d] . chris/exwm-launch-dolphin)
             ;; screenshot
             ([print] . exwm-flameshot)
+            ;; Audio
+            ([XF86AudioRaiseVolume] . desktop-environment-volume-increment)
+            ([XF86AudioLowerVolume] . desktop-environment-volume-decrement)
+            ([XF86AudioMute] . desktop-environment-toggle-mute)
             ;; 's-&': Launch application.
             ([?\s-r] . (lambda (command)
                          (interactive (list (read-shell-command "$ ")))
@@ -653,6 +664,8 @@ Also, we need a way to display the time.
                                    (string= exwm-class-name "MuseScore3")
                                    (string= exwm-class-name "Gimp")
                                    (string= exwm-class-name "mpv")
+                                   (string= exwm-class-name "feh")
+                                   (string= exwm-class-name "dolphin")
                                    (string= exwm-title "Event Tester"))
                                floating t
                                floating-mode-line nil
@@ -667,14 +680,14 @@ Also, we need a way to display the time.
 (start-process-shell-command "fehwall" nil "feh --bg-fill ~/Pictures/wallpapers/RoyalKing.png")
 (start-process-shell-command "picom" nil "picom")
 (start-process-shell-command "flameshot" nil "flameshot")
-;; (start-process-shell-command "nextcloud" nil "nextcloud")
+(start-process-shell-command "nextcloud" nil "nextcloud")
 (start-process-shell-command "caffeine" nil "caffeine")
 (start-process-shell-command "kdeconnect-indicator" nil "kdeconnect-indicator")
 #+END_SRC
 
 ** IVY SPECIFIC
 Make sure that Ivy's posframe loads above exwm windows
-#+BEGIN_SRC elisp :tangle no
+#+BEGIN_SRC elisp :tangle yes
 (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
 (defun +ivy-posframe-display-exwm (str)
   (ivy-posframe--display str
@@ -702,6 +715,9 @@ Make sure that Ivy's posframe loads above exwm windows
             (lambda (&rest args)
               (setq-local posframe--last-posframe-pixel-position nil)))
 #+END_SRC
+
+#+RESULTS:
+
 * Tramp
 Tramp for ZSH
 Needed to allow me to remote to servers using zsh as the main shell
