@@ -603,6 +603,10 @@ Also, we need a way to display the time.
 (setq exwm-workspace-number 8
       exwm-workspace-show-all-buffers t)
 
+;; Rename buffer to window title
+(defun chris/exwm-rename-buffer-to-title ()
+  (exwm-workspace-rename-buffer exwm-title))
+(add-hook! 'exwm-update-title-hook 'chris/exwm-rename-buffer-to-title)
 
 (defun chris/exwm-workspace-next ()
   "Move forward one workspace."
@@ -629,7 +633,9 @@ Also, we need a way to display the time.
   (start-process-shell-command "dolphin" none "dolphin"))
 
 ;; microphone commands
-(if (string= system-name "archdesktop") (setq desktop-environment-volume-toggle-microphone-command "amixer -c 2 set Mic toggle"))
+(if (string= system-name "archdesktop") (setq desktop-environment-volume-toggle-microphone-command "amixer -c 2 set Mic toggle | rg off && printf 'Microphone muted' || printf 'Microphone unmuted'"))
+
+(setq desktop-environment-volume-toggle-command "amixer set Master toggle | rg off && printf 'Volume muted' || printf 'Volume unmuted'")
 
 ;;Global keybindings
 (setq exwm-input-global-keys
