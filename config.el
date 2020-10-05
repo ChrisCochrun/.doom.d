@@ -506,6 +506,7 @@ This creates a new mpv video from the url passed to it."
             ([XF86AudioRaiseVolume] . desktop-environment-volume-increment)
             ([XF86AudioLowerVolume] . desktop-environment-volume-decrement)
             ([XF86AudioMute] . desktop-environment-toggle-mute)
+            ([XF86Launch8] . desktop-environment-toggle-microphone-mute)
             ;; Brightness
             ([XF86MonBrightnessUp] . desktop-environment-brightness-increment)
             ([XF86MonBrightnessDown] . desktop-environment-brightness-decrement)
