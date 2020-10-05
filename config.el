@@ -377,7 +377,7 @@ This creates a new mpv video from the url passed to it."
       (lambda nil
         (let ((path (abbreviate-file-name (eshell/pwd))))
           (concat
-           (if (string= system-name "archdesktop")
+           (if (or (string= system-name "archdesktop") (string= system-name "chris-linuxlaptop"))
                nil
              (format
               (propertize "\n(%s@%s)" 'face '(:foreground "#606580"))
