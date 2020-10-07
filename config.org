@@ -545,6 +545,8 @@ Ensure qml is added to the completion engine company
 #+BEGIN_SRC elisp :tangle yes
 ;; Using counsel-linux-app for app launcher
 (custom-set-variables '(counsel-linux-app-format-function #'counsel-linux-app-format-function-name-first))
+(map! :leader "f f" 'counsel-find-file
+      :leader "." 'counsel-find-file)
 ;; (setq +ivy-buffer-preview t)
 #+END_SRC
 
