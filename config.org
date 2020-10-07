@@ -494,10 +494,9 @@ This creates a new mpv video from the url passed to it."
 ;;; If the prompt spans over multiple lines, the regexp should match
 ;;; last line only.
 (setq-default eshell-prompt-regexp "^ ")
-#+END_SRC
 
-#+RESULTS:
-: ^
+(setq tramp-verbose 8)
+#+END_SRC
 
 * Misc
 #+BEGIN_SRC elisp
@@ -625,23 +624,29 @@ Also, we need a way to display the time.
 (defun chris/exwm-flameshot ()
   "Take a screenshot using flameshot"
   (interactive)
-  (shell-command "flameshot gui"))
+  (start-process "flameshot gui"))
 
 (defun chris/exwm-launch-dolphin ()
   "launch dolphin"
   (interactive)
-  (start-process-shell-command "dolphin" none "dolphin"))
+  (start-process "dolphin" none "dolphin"))
 
 ;; microphone commands
 (if (string= system-name "archdesktop") (setq desktop-environment-volume-toggle-microphone-command "amixer -c 2 set Mic toggle | rg off && printf 'Microphone muted' || printf 'Microphone unmuted'"))
 
 (setq desktop-environment-volume-toggle-command "amixer set Master toggle | rg off && printf 'Volume muted' || printf 'Volume unmuted'")
 
+;; make all floating windows without mode line
+(add-hook 'exwm-floating-setup-hook 'exwm-layout-hide-mode-line)
+(add-hook 'exwm-floating-exit-hook 'exwm-layout-show-mode-line)
+
 ;;Global keybindings
 (setq exwm-input-global-keys
           `(
             ;; 's-r': Reset (to line-mode).
             ([?\s-r] . exwm-reset)
+            ;; 's-i': Toggle from line to char modes
+            ([?\s-i] . exwm-input-toggle-keyboard)
             ;; 's-w': Switch workspace.
             ([?\s-w] . exwm-workspace-switch)
             ([?\s-j] . chris/exwm-workspace-prev)
@@ -683,7 +688,6 @@ Also, we need a way to display the time.
                                                    exwm-class-name)
                                    (string= exwm-class-name "MuseScore3")
                                    (string= exwm-class-name "Gimp")
-                                   (string= exwm-class-name "mpv")
                                    (string= exwm-class-name "feh")
                                    (string= exwm-class-name "dolphin")
                                    (string= exwm-title "Event Tester"))
@@ -742,7 +746,12 @@ Make sure that Ivy's posframe loads above exwm windows
 Tramp for ZSH
 Needed to allow me to remote to servers using zsh as the main shell
 #+BEGIN_SRC elisp
-(setq tramp-terminal-type "tramp")
+(setq tramp-terminal-type "dumb")
 #+END_SRC
-
-
+* Transmission
+#+BEGIN_SRC elisp
+(map! :leader "o T" 'transmission)
+(setq transmission-host "192.168.1.35"
+      transmission-rpc-path "/transmission/rpc"
+      transmission-refresh-modes '(transmission-mode transmission-files-mode transmission-info-mode transmission-peers-mode))
+#+END_SRC

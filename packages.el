@@ -65,6 +65,7 @@
 (package! rg)
 (package! mu4e-alert)
 (package! desktop-environment)
+(package! transmission)
 
 ;; (package! helm :disable t)
 ;; (package! helm-easymenu :disable t)
