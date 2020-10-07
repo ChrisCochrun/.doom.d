@@ -498,6 +498,9 @@ This creates a new mpv video from the url passed to it."
 (setq tramp-verbose 8)
 #+END_SRC
 
+#+RESULTS:
+: 8
+
 * Misc
 #+BEGIN_SRC elisp
 ;; Set Vterm to zsh
