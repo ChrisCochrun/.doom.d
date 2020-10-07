@@ -426,6 +426,8 @@ This creates a new mpv video from the url passed to it."
 
 ;; Using counsel-linux-app for app launcher
 (custom-set-variables '(counsel-linux-app-format-function #'counsel-linux-app-format-function-name-first))
+(map! :leader "f f" 'counsel-find-file
+      :leader "." 'counsel-find-file)
 ;; (setq +ivy-buffer-preview t)
 
 (set-frame-parameter nil 'fullscreen 'fullboth)
