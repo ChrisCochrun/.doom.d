@@ -507,7 +507,7 @@ This creates a new mpv video from the url passed to it."
 #+END_SRC
 
 #+RESULTS:
-: 1024
+: ^
 
 * Misc
 #+BEGIN_SRC elisp
@@ -523,6 +523,9 @@ This creates a new mpv video from the url passed to it."
 (add-to-list 'default-frame-alist '(alpha 75 75))
 
 #+END_SRC
+
+#+RESULTS:
+: ((right-divider-width . 1) (bottom-divider-width . 1) (font . -*-VictorMono Nerd Font-semibold-*-*-*-*-120-*-*-*-*-*-*) (tool-bar-lines . 0) (menu-bar-lines . 0) (alpha 75 75) (vertical-scroll-bars) (buffer-predicate . exwm-layout--other-buffer-predicate) (left-fringe . 4) (right-fringe . 4))
 
 QT/QML
 Ensure qml is added to the completion engine company
