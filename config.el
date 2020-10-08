@@ -347,70 +347,72 @@ This creates a new mpv video from the url passed to it."
 (map! :map cfw:details-mode-map
       :n "q" 'cfw:details-kill-buffer-command)
 
-(require 'em-tramp)
+(use-package! eshell
+    :config
+  (require 'em-tramp)
 
-(with-eval-after-load 'esh-module   ;; REVIEW: It used to work, but now the early `provide' seems to backfire.
-  (unless (boundp 'eshell-modules-list)
-    (load "esh-module"))   ;; Don't print the banner.
-  (push 'eshell-tramp eshell-modules-list))
+  (with-eval-after-load 'esh-module   ;; REVIEW: It used to work, but now the early `provide' seems to backfire.
+    (unless (boundp 'eshell-modules-list)
+      (load "esh-module"))   ;; Don't print the banner.
+    (push 'eshell-tramp eshell-modules-list))
 
-(setq password-cache t
-      password-cache-expiry 3600)
+  (setq password-cache t
+        password-cache-expiry 3600)
 
-(setq eshell-history-size 1024)
+  (setq eshell-history-size 1024)
 
-;;; Extra execution information
-(defvar chris/eshell-status-p t
-  "If non-nil, display status before prompt.")
-(defvar chris/eshell-status--last-command-time nil)
-(make-variable-buffer-local 'chris/eshell-status--last-command-time)
-(defvar chris/eshell-status-min-duration-before-display 0
-  "If a command takes more time than this, display its duration.")
+  ;;; Extra execution information
+  (defvar chris/eshell-status-p t
+    "If non-nil, display status before prompt.")
+  (defvar chris/eshell-status--last-command-time nil)
+  (make-variable-buffer-local 'chris/eshell-status--last-command-time)
+  (defvar chris/eshell-status-min-duration-before-display 0
+    "If a command takes more time than this, display its duration.")
 
-(defun chris/eshell-status-display ()
-  (if chris/eshell-status--last-command-time
-    (let ((duration (time-subtract (current-time) chris/eshell-status--last-command-time)))
-      (setq chris/eshell-status--last-command-time nil)
-      (when (> (time-to-seconds duration) chris/eshell-status-min-duration-before-display)
-        (format "  %.3fs %s"
-                (time-to-seconds duration)
-                (format-time-string "| %F %T" (current-time)))))
-    (format "  0.000s")))
+  (defun chris/eshell-status-display ()
+    (if chris/eshell-status--last-command-time
+        (let ((duration (time-subtract (current-time) chris/eshell-status--last-command-time)))
+          (setq chris/eshell-status--last-command-time nil)
+          (when (> (time-to-seconds duration) chris/eshell-status-min-duration-before-display)
+            (format "  %.3fs %s"
+                    (time-to-seconds duration)
+                    (format-time-string "| %F %T" (current-time)))))
+      (format "  0.000s")))
 
-(defun chris/eshell-status-record ()
-  (setq chris/eshell-status--last-command-time (current-time)))
+  (defun chris/eshell-status-record ()
+    (setq chris/eshell-status--last-command-time (current-time)))
 
-(add-hook 'eshell-pre-command-hook 'chris/eshell-status-record)
+  (add-hook 'eshell-pre-command-hook 'chris/eshell-status-record)
 
-(setq eshell-prompt-function
-      (lambda nil
-        (let ((path (abbreviate-file-name (eshell/pwd))))
-          (concat
-           (if (or (string= system-name "archdesktop") (string= system-name "chris-linuxlaptop"))
-               nil
-             (format
-              (propertize "\n(%s@%s)" 'face '(:foreground "#606580"))
-              (propertize (user-login-name) 'face '(:inherit compilation-warning))
-              (propertize (system-name) 'face '(:inherit compilation-warning))))
-           (if (and (require 'magit nil t) (or (magit-get-current-branch) (magit-get-current-tag)))
-               (let* ((root (abbreviate-file-name (magit-rev-parse "--show-toplevel")))
-                      (after-root (substring-no-properties path (min (length path) (1+ (length root))))))
-                 (format
-                  (propertize "\n[ %s | %s@%s ]" 'face font-lock-comment-face)
-                  (propertize root 'face `(:inherit org-warning))
-                  (propertize after-root 'face `(:inherit org-level-1))
-                  (propertize (or (magit-get-current-branch) (magit-get-current-tag)) 'face `(:inherit org-macro))))
-             (format
-              (propertize "\n[%s]" 'face font-lock-comment-face)
-              (propertize path 'face `(:inherit org-level-1))))
-           (when chris/eshell-status-p
-             (propertize (or (chris/eshell-status-display) "") 'face font-lock-comment-face))
-           (propertize "\n" 'face '(:inherit org-todo :weight ultra-bold))
-           " "))))
+  (setq eshell-prompt-function
+        (lambda nil
+          (let ((path (abbreviate-file-name (eshell/pwd))))
+            (concat
+             (if (or (string= system-name "archdesktop") (string= system-name "chris-linuxlaptop"))
+                 nil
+               (format
+                (propertize "\n(%s@%s)" 'face '(:foreground "#606580"))
+                (propertize (user-login-name) 'face '(:inherit compilation-warning))
+                (propertize (system-name) 'face '(:inherit compilation-warning))))
+             (if (and (require 'magit nil t) (or (magit-get-current-branch) (magit-get-current-tag)))
+                 (let* ((root (abbreviate-file-name (magit-rev-parse "--show-toplevel")))
+                        (after-root (substring-no-properties path (min (length path) (1+ (length root))))))
+                   (format
+                    (propertize "\n[ %s | %s@%s ]" 'face font-lock-comment-face)
+                    (propertize root 'face `(:inherit org-warning))
+                    (propertize after-root 'face `(:inherit org-level-1))
+                    (propertize (or (magit-get-current-branch) (magit-get-current-tag)) 'face `(:inherit org-macro))))
+               (format
+                (propertize "\n[%s]" 'face font-lock-comment-face)
+                (propertize path 'face `(:inherit org-level-1))))
+             (when chris/eshell-status-p
+               (propertize (or (chris/eshell-status-display) "") 'face font-lock-comment-face))
+             (propertize "\n" 'face '(:inherit org-todo :weight ultra-bold))
+             " "))))
 
-;;; If the prompt spans over multiple lines, the regexp should match
-;;; last line only.
-(setq-default eshell-prompt-regexp "^ ")
+  ;;; If the prompt spans over multiple lines, the regexp should match
+  ;;; last line only.
+  (setq-default eshell-prompt-regexp "^ "))
 
 ;; Set Vterm to zsh
 (setq vterm-shell "/bin/fish")
@@ -571,32 +573,34 @@ This creates a new mpv video from the url passed to it."
 (start-process-shell-command "caffeine" nil "caffeine")
 (start-process-shell-command "kdeconnect-indicator" nil "kdeconnect-indicator")
 
-(setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
-(defun +ivy-posframe-display-exwm (str)
-  (ivy-posframe--display str
-   (lambda (info)
-     (let* ((workarea (elt exwm-workspace--workareas exwm-workspace-current-index))
-            (x (aref workarea 0))
-            (y (aref workarea 1))
+(use-package! ivy-posframe
+    :config
+  (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
+  (defun +ivy-posframe-display-exwm (str)
+    (ivy-posframe--display str
+      (lambda (info)
+        (let* ((workarea (elt exwm-workspace--workareas exwm-workspace-current-index))
+               (x (aref workarea 0))
+               (y (aref workarea 1))
 
-            (fw (aref workarea 2))
-            (fh (aref workarea 3))
+               (fw (aref workarea 2))
+               (fh (aref workarea 3))
 
-            (pw (plist-get info :posframe-width))
-            (ph (plist-get info :posframe-height)))
+               (pw (plist-get info :posframe-width))
+               (ph (plist-get info :posframe-height)))
 
-       (cons (+ x (/ (- fw pw) 2)) (+ y (/ (- fh ph) 2)))))))
+          (cons (+ x (/ (- fw pw) 2)) (+ y (/ (- fh ph) 2)))))))
 
-(setq ivy-posframe-display-functions-alist
-      '((t . +ivy-posframe-display-exwm))
+  (setq ivy-posframe-display-functions-alist
+        '((t . +ivy-posframe-display-exwm))
 
-      ivy-posframe-parameters '((parent-frame nil)
-                                (z-group . above)))
+        ivy-posframe-parameters '((parent-frame nil)
+                                  (z-group . above)))
 
-;; force set frame-position on every posframe display
-(advice-add 'posframe--set-frame-position :before
-            (lambda (&rest args)
-              (setq-local posframe--last-posframe-pixel-position nil)))
+  ;; force set frame-position on every posframe display
+  (advice-add 'posframe--set-frame-position :before
+               (lambda (&rest args)
+                 (setq-local posframe--last-posframe-pixel-position nil))))
 
 (setq tramp-terminal-type "dumb")
 
