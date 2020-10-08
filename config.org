@@ -439,8 +439,17 @@ This creates a new mpv video from the url passed to it."
 #+END_SRC
 * EShell
 #+BEGIN_SRC elisp
-(setq password-cache t)
-(setq password-cache-expiry 3600)
+(require 'em-tramp)
+
+(with-eval-after-load 'esh-module   ;; REVIEW: It used to work, but now the early `provide' seems to backfire.
+  (unless (boundp 'eshell-modules-list)
+    (load "esh-module"))   ;; Don't print the banner.
+  (push 'eshell-tramp eshell-modules-list))
+
+(setq password-cache t
+      password-cache-expiry 3600)
+
+(setq eshell-history-size 1024)
 
 ;;; Extra execution information
 (defvar chris/eshell-status-p t
@@ -495,11 +504,10 @@ This creates a new mpv video from the url passed to it."
 ;;; last line only.
 (setq-default eshell-prompt-regexp "^ ")
 
-(setq tramp-verbose 8)
 #+END_SRC
 
 #+RESULTS:
-: 8
+: 1024
 
 * Misc
 #+BEGIN_SRC elisp
@@ -527,6 +535,7 @@ Ensure qml is added to the completion engine company
                                          "/home/chris/.Felgo/Felgo/gcc_64/import/Felgo/felgo.qmltypes"
                                          "/home/chris/.Felgo/Felgo/gcc_64/qml"))
 
+(setq company-idle-delay 0.1)
 #+END_SRC
 * Completion
 ** SELECTRUM

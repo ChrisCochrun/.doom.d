@@ -347,8 +347,17 @@ This creates a new mpv video from the url passed to it."
 (map! :map cfw:details-mode-map
       :n "q" 'cfw:details-kill-buffer-command)
 
-(setq password-cache t)
-(setq password-cache-expiry 3600)
+(require 'em-tramp)
+
+(with-eval-after-load 'esh-module   ;; REVIEW: It used to work, but now the early `provide' seems to backfire.
+  (unless (boundp 'eshell-modules-list)
+    (load "esh-module"))   ;; Don't print the banner.
+  (push 'eshell-tramp eshell-modules-list))
+
+(setq password-cache t
+      password-cache-expiry 3600)
+
+(setq eshell-history-size 1024)
 
 ;;; Extra execution information
 (defvar chris/eshell-status-p t
@@ -403,8 +412,6 @@ This creates a new mpv video from the url passed to it."
 ;;; last line only.
 (setq-default eshell-prompt-regexp "^ ")
 
-(setq tramp-verbose 8)
-
 ;; Set Vterm to zsh
 (setq vterm-shell "/bin/fish")
 
@@ -423,6 +430,8 @@ This creates a new mpv video from the url passed to it."
                                          "/home/chris/.Felgo/Felgo/gcc_64/import/VPlay/vplay.qmltypes"
                                          "/home/chris/.Felgo/Felgo/gcc_64/import/Felgo/felgo.qmltypes"
                                          "/home/chris/.Felgo/Felgo/gcc_64/qml"))
+
+(setq company-idle-delay 0.1)
 
 ;; Using counsel-linux-app for app launcher
 (custom-set-variables '(counsel-linux-app-format-function #'counsel-linux-app-format-function-name-first))
