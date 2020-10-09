@@ -222,27 +222,9 @@
     (mapc #'elfeed-search-update-entry entries)
     (unless (use-region-p) (forward-line))))
 
-;; function to launch mpv from elfeed
-(defun elfeed-a-mpv (url)
-  "Watch a video from URL in MPV
-This creates a new mpv video from the url passed to it."
-  (async-shell-command (format "mpv --prefetch-playlist=yes --no-audio-display --playlist-start=auto %s" url)))
-
-(defun elfeed-view-mpv-audio (&optional use-generic-p)
-  "Youtube-feed link"
-  (interactive "P")
-  (let ((entries (elfeed-search-selected)))
-    (cl-loop for entry in entries
-             do (elfeed-untag entry 'unread)
-             when (elfeed-entry-link entry)
-             do (elfeed-a-mpv it))
-    (mapc #'elfeed-search-update-entry entries)
-    (unless (use-region-p) (forward-line))))
-
 ;; mapping keys to launch mpv
 (map! :map elfeed-search-mode-map
-      :n "v" 'elfeed-view-mpv
-      :n "a" 'elfeed-view-mpv-audio)
+      :n "v" 'elfeed-view-mpv)
 
 (map! :leader "o M" 'emms)
 (require 'emms-setup)
