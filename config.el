@@ -196,7 +196,8 @@
         org-roam-server-serve-files t
         org-roam-server-network-label-truncate t
         org-roam-server-network-label-truncate-length 60
-        org-roam-server-network-label-wrap-length 20))
+        org-roam-server-network-label-wrap-length 20)
+  :after org-roam)
 
 (add-hook! org-roam-mode org-roam-server-mode t)
 
@@ -484,9 +485,15 @@
   (start-process "dolphin" none "dolphin"))
 
 ;; microphone commands
-(if (string= system-name "archdesktop") (setq desktop-environment-volume-toggle-microphone-command "amixer -c 2 set Mic toggle | rg off && printf 'Microphone muted' || printf 'Microphone unmuted'"))
+(if (string= system-name "archdesktop")
+    (setq desktop-environment-volume-toggle-microphone-command
+          "amixer -c 2 set Mic toggle | rg off && printf 'Microphone muted' || printf 'Microphone unmuted'"))
 
-(setq desktop-environment-volume-toggle-command "amixer set Master toggle | rg off && printf 'Volume muted' || printf 'Volume unmuted'")
+(setq desktop-environment-volume-toggle-command
+      "amixer set Master toggle | rg off && printf 'Volume muted' || printf 'Volume unmuted'")
+
+(setq desktop-environment-volume-set-command "amixer set Master %s")
+(setq desktop-environment-volume-get-command "amixer get Master %s")
 
 ;; make all floating windows without mode line
 (add-hook 'exwm-floating-setup-hook 'exwm-layout-hide-mode-line)
@@ -500,7 +507,7 @@
             ;; 's-i': Toggle from line to char modes
             ([?\s-i] . exwm-input-toggle-keyboard)
             ;; 's-w': Switch workspace.
-            ([?\s-w] . exwm-workspace-switch)
+            ([?\s-w] . +hydra/window-move/body)
             ([?\s-j] . chris/exwm-workspace-prev)
             ([?\s-k] . chris/exwm-workspace-next)
             ;; Switch Buffer
@@ -546,6 +553,42 @@
                                floating t
                                floating-mode-line nil
                                )))
+
+(defhydra +hydra/window-move (:hint nil)
+  "
+          Split: _v_ert  _s_:horz
+         Delete: _c_lose  _o_nly
+  Switch Window: _h_:left  _j_:down  _k_:up  _l_:right
+        Buffers: _p_revious  _n_ext  _b_:select  _f_ind-file
+         Resize: _H_:splitter left  _J_:splitter down  _K_:splitter up  _L_:splitter right
+           Move: _a_:up  _z_:down  _i_menu
+"
+  ("z" scroll-up-line)
+  ("a" scroll-down-line)
+  ("i" idomenu)
+
+  ("h" windmove-left)
+  ("j" windmove-down)
+  ("k" windmove-up)
+  ("l" windmove-right)
+
+  ("p" previous-buffer)
+  ("n" next-buffer)
+  ("b" switch-to-buffer)
+  ("f" find-file)
+
+  ("s" split-window-below)
+  ("v" split-window-right)
+
+  ("c" delete-window)
+  ("o" delete-other-windows)
+
+  ("H" hydra-move-splitter-left)
+  ("J" hydra-move-splitter-down)
+  ("K" hydra-move-splitter-up)
+  ("L" hydra-move-splitter-right)
+
+  ("q" nil))
 
 (start-process-shell-command "xset" nil "xset r rate 220 90")
 (start-process-shell-command "fehwall" nil "feh --bg-fill ~/Pictures/wallpapers/RoyalKing.png")
