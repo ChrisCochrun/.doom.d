@@ -66,6 +66,11 @@
 (package! mu4e-alert)
 (package! desktop-environment)
 (package! transmission)
+(package! edwina)
+
+(package! friar
+  :recipe (:host github :repo "shtwzrd/friar" :branch "master"
+           :files (:defaults "*.lua" "*.fnl")))
 
 ;; (package! helm :disable t)
 ;; (package! helm-easymenu :disable t)
