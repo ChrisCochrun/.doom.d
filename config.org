@@ -103,14 +103,11 @@ LF UTF-8 is the default file encoding. So it's not worth showing in the modeline
 * Org Mode
 
 #+BEGIN_SRC elisp
-
 ;; org
 (setq org-superstar-headline-bullets-list '("◉" "◈" "▸" "◎" "✬" "◇" "❉" "✙" "❖"))
 (setq olivetti-body-width 0.6)
 (setq olivetti-minimum-body-width 100)
 (setq org-imenu-depth 3)
-(setq org-export-with-toc nil)
-(setq org-export-with-author nil)
 (add-hook! org-mode (setq hl-line-mode nil))
 
 (add-hook! 'org-mode-hook (lambda () (imenu-add-to-menubar "Imenu")))
@@ -141,6 +138,23 @@ LF UTF-8 is the default file encoding. So it's not worth showing in the modeline
 (setq org-agenda-files
    '("/home/chris/org/DMPREADME.org" "/home/chris/org/DMPTODO.org" "/home/chris/org/inbox.org" "/home/chris/org/notes.org" "/home/chris/org/repetition.org" "/home/chris/org/tasks.org" "/home/chris/org/tfc_plans.org" "/home/chris/org/ministry_team.org" "/home/chris/org/todo.org" "/home/chris/org/newsletter.org"))
 
+#+END_SRC
+
+#+RESULTS:
+
+** Custom Org Markers
+#+BEGIN_SRC elisp :tangle no
+(defun org-add-my-extra-markup ()
+  "Add highlight emphasis."
+  (add-to-list 'org-font-lock-extra-keywords
+               '("[^\\w]\\(:\\[^\n\r\t]+:\\)[^\\w]"
+                 (1 '(face highlight invisible nil)))))
+
+(add-hook 'org-font-lock-set-keywords-hook #'org-add-my-extra-markup)
+#+END_SRC
+** Org Capture
+Here is our org capture templates
+#+BEGIN_SRC elisp
 (setq org-capture-templates
       '(("t" "Personal todo" entry
          (file+headline +org-capture-todo-file "Inbox")
@@ -167,10 +181,11 @@ LF UTF-8 is the default file encoding. So it's not worth showing in the modeline
         ("on" "Project notes" entry #'+org-capture-central-project-notes-file
          "* %U %?\n %i\n %a" :heading "Notes" :prepend t)
         ("oc" "Project changelog" entry #'+org-capture-central-project-changelog-file
-         "* %U %?\n %i\n %a" :heading "Changelog" :prepend t))
-)
-
-;; org-super-agenda
+         "* %U %?\n %i\n %a" :heading "Changelog" :prepend t)))
+#+END_SRC
+** Org Super Agenda
+Here we need to setup how we want org super agenda to look
+#+BEGIN_SRC elisp
 (use-package! org-super-agenda
   :after org-agenda
   :init
@@ -189,20 +204,14 @@ LF UTF-8 is the default file encoding. So it's not worth showing in the modeline
   :config
   (org-super-agenda-mode))
 (setq org-super-agenda-header-map nil)
-
 #+END_SRC
+** Org Export
+Here we are defining how we want to export org files to other files.
 
-#+RESULTS:
-
-** Custom Org Markers
-#+BEGIN_SRC elisp :tangle no
-(defun org-add-my-extra-markup ()
-  "Add highlight emphasis."
-  (add-to-list 'org-font-lock-extra-keywords
-               '("[^\\w]\\(:\\[^\n\r\t]+:\\)[^\\w]"
-                 (1 '(face highlight invisible nil)))))
-
-(add-hook 'org-font-lock-set-keywords-hook #'org-add-my-extra-markup)
+We don't want to export the table of contents or the author most of the time.
+#+BEGIN_SRC elisp
+(setq org-export-with-toc nil)
+(setq org-export-with-author nil)
 #+END_SRC
 
 * Org Roam

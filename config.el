@@ -85,8 +85,6 @@
 (setq olivetti-body-width 0.6)
 (setq olivetti-minimum-body-width 100)
 (setq org-imenu-depth 3)
-(setq org-export-with-toc nil)
-(setq org-export-with-author nil)
 (add-hook! org-mode (setq hl-line-mode nil))
 
 (add-hook! 'org-mode-hook (lambda () (imenu-add-to-menubar "Imenu")))
@@ -143,10 +141,8 @@
         ("on" "Project notes" entry #'+org-capture-central-project-notes-file
          "* %U %?\n %i\n %a" :heading "Notes" :prepend t)
         ("oc" "Project changelog" entry #'+org-capture-central-project-changelog-file
-         "* %U %?\n %i\n %a" :heading "Changelog" :prepend t))
-)
+         "* %U %?\n %i\n %a" :heading "Changelog" :prepend t)))
 
-;; org-super-agenda
 (use-package! org-super-agenda
   :after org-agenda
   :init
@@ -165,6 +161,9 @@
   :config
   (org-super-agenda-mode))
 (setq org-super-agenda-header-map nil)
+
+(setq org-export-with-toc nil)
+(setq org-export-with-author nil)
 
 ;; Org-Roam
 (setq org-roam-directory "~/org")
