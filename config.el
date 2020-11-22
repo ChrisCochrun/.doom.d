@@ -400,6 +400,18 @@
   ;;; last line only.
   (setq-default eshell-prompt-regexp "^ "))
 
+(setq eshell-command-aliases-list
+      '(("ls" "lsd $1")
+       ("q" "exit")
+       ("f" "find-file $1")
+       ("ff" "find-file $1")
+       ("d" "dired $1")
+       ("bd" "eshell-up $1")
+       ("rg" "rg --color=always $*")
+       ("ll" "ls -lah $*")
+       ("gg" "magit-status")
+       ("clear" "clear-scrollback")))
+
 ;; Set Vterm to zsh
 (setq vterm-shell "/bin/fish")
 

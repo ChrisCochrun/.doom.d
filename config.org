@@ -509,6 +509,20 @@ Org-Roam server. This let's me visualize my notes.
 
 #+RESULTS:
 : ^
+** Eshell Aliases
+#+BEGIN_SRC elisp
+(setq eshell-command-aliases-list
+      '(("ls" "lsd $1")
+       ("q" "exit")
+       ("f" "find-file $1")
+       ("ff" "find-file $1")
+       ("d" "dired $1")
+       ("bd" "eshell-up $1")
+       ("rg" "rg --color=always $*")
+       ("ll" "ls -lah $*")
+       ("gg" "magit-status")
+       ("clear" "clear-scrollback")))
+#+END_SRC
 
 * Misc
 #+BEGIN_SRC elisp
