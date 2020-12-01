@@ -87,6 +87,7 @@
 (setq org-imenu-depth 3)
 (setq org-export-with-toc nil)
 (setq org-export-with-author nil)
+(setq org-odt-styles-file "/home/chris/org/style.odt")
 (add-hook! org-mode (setq hl-line-mode nil))
 
 (add-hook! 'org-mode-hook (lambda () (imenu-add-to-menubar "Imenu")))
