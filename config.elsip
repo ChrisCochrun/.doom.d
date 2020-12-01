@@ -1,0 +1,3 @@
+(setq exwm-input-simulation-keys
+'(
+))

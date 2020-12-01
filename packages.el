@@ -55,6 +55,7 @@
 (package! exwm)
 (package! olivetti)
 (package! org-autolist)
+(package! org-wild-notifier)
 (package! emms)
 (package! nov)
 ;; (package! mu4e-views)

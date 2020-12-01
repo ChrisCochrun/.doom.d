@@ -68,9 +68,9 @@ Welcome to my doom emacs config. I'm using literate programming because it allow
 (setq-default delete-by-moving-to-trash t
               tab-width 4)
 ;; gdscript
-(require 'gdscript-mode)
-
+;; (require 'gdscript-mode)
 #+END_SRC
+
 * Doom Modeline
 
 Doom's modeline is great, but with just a bit of tweaking, it's even better.
@@ -96,14 +96,16 @@ LF UTF-8 is the default file encoding. So it's not worth showing in the modeline
 #+END_SRC
 * Doom Dashboard
 #+BEGIN_SRC elisp
-(setq +doom-dashboard-banner-dir "/home/chris/.doom.d/banner/")
+(setq +doom-dashboard-banner-dir "/home/chris/.config/doom/banner/")
 (setq +doom-dashboard-banner-file "whitelionsmall.png")
 #+END_SRC
+
+#+RESULTS:
+: whitelionsmall.png
 
 * Org Mode
 
 #+BEGIN_SRC elisp
-
 ;; org
 (setq org-superstar-headline-bullets-list '("◉" "◈" "▸" "◎" "✬" "◇" "❉" "✙" "❖"))
 (setq olivetti-body-width 0.6)
@@ -118,7 +120,7 @@ LF UTF-8 is the default file encoding. So it's not worth showing in the modeline
 
 (setq org-todo-keywords
       '((sequence "TODO(t)" "PROJ(p)" "STRT(s)" "WAIT(w)" "HOLD(h)" "|" "DONE(d)" "CNCL(c)")
- (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
+        (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
 
 
 ;; (add-hook! org-mode (olivetti-mode t))
@@ -140,8 +142,13 @@ LF UTF-8 is the default file encoding. So it's not worth showing in the modeline
 (setq deft-directory "~/org/")
 
 (setq org-agenda-files
-   '("/home/chris/org/DMPREADME.org" "/home/chris/org/DMPTODO.org" "/home/chris/org/inbox.org" "/home/chris/org/notes.org" "/home/chris/org/repetition.org" "/home/chris/org/tasks.org" "/home/chris/org/tfc_plans.org" "/home/chris/org/ministry_team.org" "/home/chris/org/todo.org" "/home/chris/org/newsletter.org"))
+      '("/home/chris/org/DMPREADME.org" "/home/chris/org/DMPTODO.org" "/home/chris/org/inbox.org" "/home/chris/org/notes.org" "/home/chris/org/repetition.org" "/home/chris/org/tasks.org" "/home/chris/org/tfc_plans.org" "/home/chris/org/ministry_team.org" "/home/chris/org/todo.org" "/home/chris/org/newsletter.org"))
 
+#+END_SRC
+
+** Org Capture
+Here is our org capture templates
+#+BEGIN_SRC elisp
 (setq org-capture-templates
       '(("t" "Personal todo" entry
          (file+headline +org-capture-todo-file "Inbox")
@@ -168,10 +175,15 @@ LF UTF-8 is the default file encoding. So it's not worth showing in the modeline
         ("on" "Project notes" entry #'+org-capture-central-project-notes-file
          "* %U %?\n %i\n %a" :heading "Notes" :prepend t)
         ("oc" "Project changelog" entry #'+org-capture-central-project-changelog-file
-         "* %U %?\n %i\n %a" :heading "Changelog" :prepend t))
-)
+         "* %U %?\n %i\n %a" :heading "Changelog" :prepend t)))
+#+END_SRC
 
-;; org-super-agenda
+#+RESULTS:
+| t | Personal todo | entry | (file+headline +org-capture-todo-file Inbox) | * TODO %^{TODO name} |
+
+** Org Super Agenda
+Here we need to setup how we want org super agenda to look
+#+BEGIN_SRC elisp
 (use-package! org-super-agenda
   :after org-agenda
   :init
@@ -190,11 +202,15 @@ LF UTF-8 is the default file encoding. So it's not worth showing in the modeline
   :config
   (org-super-agenda-mode))
 (setq org-super-agenda-header-map nil)
-
 #+END_SRC
+** Org Export
+Here we are defining how we want to export org files to other files.
 
-#+RESULTS:
-
+We don't want to export the table of contents or the author most of the time.
+#+BEGIN_SRC elisp
+(setq org-export-with-toc nil)
+(setq org-export-with-author nil)
+#+END_SRC
 ** Custom Org Markers
 #+BEGIN_SRC elisp :tangle no
 (defun org-add-my-extra-markup ()
@@ -205,6 +221,19 @@ LF UTF-8 is the default file encoding. So it's not worth showing in the modeline
 
 (add-hook 'org-font-lock-set-keywords-hook #'org-add-my-extra-markup)
 #+END_SRC
+** Org Wild Notifier
+#+begin_src elisp
+(use-package! org-wild-notifier
+  :init (org-wild-notifier-mode 1)
+  :custom
+  (alert-default-style 'notifications)
+  (org-wild-notifier-alert-time '(1 10 30))
+  (org-wild-notifier-keyword-whitelist '("TODO" "STRT" "PROJ"))
+  (org-wild-notifier-notification-title "Org Reminder"))
+#+end_src
+
+#+RESULTS:
+: org-wild-notifier
 
 * Org Roam
 
@@ -264,19 +293,21 @@ Org-Roam server. This let's me visualize my notes.
 #+END_SRC
 * Elfeed
 
+Start by adding an easy way to open elfeed and force and update everytime we open it.
 #+BEGIN_SRC elisp
-;; elfeed
 (map! :leader "o F" 'elfeed)
-
-;; Make elfeed update when opened
 (add-hook! 'elfeed-search-mode-hook 'elfeed-update)
 
+#+END_SRC
+
+Easy way of adding youtube videos and podcasts to EMMS and MPV
+#+BEGIN_SRC elisp
 ;; function to launch mpv from elfeed
 (defun elfeed-v-mpv (url)
   "Watch a video from URL in MPV"
   (emms-add-url url))
 
-(defun elfeed-view-mpv (&optional use-generic-p)
+(defun chris/elfeed-view-add-mpv (&optional use-generic-p)
   "Youtube-feed link"
   (interactive "P")
   (let ((entries (elfeed-search-selected)))
@@ -287,23 +318,113 @@ Org-Roam server. This let's me visualize my notes.
     (mapc #'elfeed-search-update-entry entries)
     (unless (use-region-p) (forward-line))))
 
-;; mapping keys to launch mpv
-(map! :map elfeed-search-mode-map
-      :n "v" 'elfeed-view-mpv)
+;; (defun chris/elfeed-view-add-emms (&optional use-generic-p)
+;;   "Youtube-feed link"
+;;   (interactive "P")
+;;   (let ((entries (elfeed-search-selected)))
+;;     (cl-loop for entry in entries
+;;              do (elfeed-untag entry 'unread)
+;;              do (emms-add-url (car (elt (elfeed-entry-enclosures entry)
+;;                                         (- enclosure-index 1))))
+;;              )
+;;     (mapc #'elfeed-search-update-entry entries)
+;;     (unless (use-region-p) (forward-line)))
 
+(defun elfeed-show-add-enclosure-to-playlist (enclosure-index)
+  "Add enclosure number ENCLOSURE-INDEX to current EMMS playlist.
+Prompts for ENCLOSURE-INDEX when called interactively."
 
+  (interactive (list (elfeed--enclosure-maybe-prompt-index elfeed-show-entry)))
+  (require 'emms) ;; optional
+  (with-no-warnings ;; due to lazy (require )
+    (emms-add-url   (car (elt (elfeed-entry-enclosures elfeed-show-entry)
+                              (- enclosure-index 1))))))
+
+  ;; mapping keys to launch mpv
+  (map! :map elfeed-search-mode-map
+        :n "v" 'chris/elfeed-view-add-mpv
+        :n "e" 'chris/elfeed-view-add-emms)
 #+END_SRC
+
+#+RESULTS:
+
 * EMMS
 #+BEGIN_SRC elisp
 (map! :leader "o M" 'emms)
 (require 'emms-setup)
 (emms-all)
 (emms-default-players)
+(setq emms-volume-change-function 'emms-volume-pulse-change)
 #+END_SRC
 
 #+BEGIN_SRC elisp
-(map! :leader "P" 'emms-pause)
+(map! :leader
+      (:prefix ("e" . "EMMS")
+       :desc "Pause" "p" 'emms-pause))
 #+END_SRC
+
+#+RESULTS:
+: emms-pause
+
+We want audio files to play with a different set of MPV commands.
+#+begin_src elisp :tangle no
+(defun chris/emms-mpv-decrease-speed ()
+  "Descrease the speed of currently playing track in MPV"
+  (interactive "P")
+  (emms-player-mpv-cmd '(seek )))
+(defun chris/emms-mpv-increase-speed ()
+  "Increase the speed of currently playing track in MPV"
+  (interactive "P")
+  (emms-player-mpv-cmd "]"))
+
+(defun chris/emms-seek-backward ()
+  "Seek back 30 seconds"
+  (interactive "P")
+  (emms-seek (- 30)))
+
+(map! :leader "e [" 'chris/emms-mpv-decrease-speed
+      :desc "Increase speed" "e ]" 'chris/emms-mpv-increase-speed
+      :desc "Seek backward" "e ," 'emms-seek-backward
+      :desc "Seek forward" "e ." 'emms-seek-forward)
+#+end_src
+
+#+RESULTS:
+: chris/emms-mpv-increase-speed
+
+Let's make an emms hydra for typical controls and map them to the EMMS leader so the heads can be quick-called.
+- [ ] Fix the heads being called from the keybindings
+#+begin_src elisp
+(defhydra +hydra/emms-controls (:hint nil)
+  "
+   audio: _j_:lower     _k_:raise
+    seek: _h_:backward  _l_:forward  _H_:back 30sec
+    play: _p_ause/_p_lay
+
+    quit: _q_
+"
+  ("h" emms-seek-backward)
+  ("j" emms-volume-lower)
+  ("k" emms-volume-raise)
+  ("l" emms-seek-forward)
+  ("H" chris/emms-seek-backward)
+
+  ("p" emms-pause)
+
+  ("q" nil))
+
+(map! :leader
+      :desc "EMMS Controls" "e a" '+hydra/emms-controls/body
+      :desc "Seek Back Hydra" "e h" '+hydra/emms-cotrols/emms-seek-backward
+      :desc "Seek Back 30s Hydra" "e H" '+hydra/emms-cotrols/chris/emms-seek-backward
+      :desc "Seek Forward Hydra" "e l" '+hydra/emms-cotrols/emms-seek-forward
+      :desc "Volume Down Hydra" "e j" '+hydra/emms-cotrols/emms-volume-lower
+      :desc "Volume Up Hydra" "e k" '+hydra/emms-cotrols/emms-volume-raise
+      :desc "Pause Hydra" "e P" '+hydra/emms-cotrols/emms-pause)
+#+end_src
+
+#+RESULTS:
+: +hydra/emms-cotrols/emms-pause
+
 * Mu4e
 
 #+BEGIN_SRC elisp
@@ -371,11 +492,13 @@ Org-Roam server. This let's me visualize my notes.
       mu4e-attachment-dir "/home/chris/storage/Nextcloud/attachments")
 #+END_SRC
 
+Let's setup some notifications for Mu4e and then set the update interval to every 10 minutes.
 #+BEGIN_SRC elisp
 (mu4e-alert-set-default-style 'notifications)
 (add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
 (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display)
 (setq mu4e-alert-email-notification-types '(count))
+(setq mu4e-update-interval 600)
 
 (setq mu4e-alert-interesting-mail-query
       (concat
@@ -402,6 +525,22 @@ Org-Roam server. This let's me visualize my notes.
 #+BEGIN_SRC elisp :tangle no
 (use-package! mu4e-views :disabled t)
 #+END_SRC
+* Ledger
+Here we'll define some ledger stuff
+
+First thing is let's make sure org-mode can speak ledger, then we'll make sure dired's all-the-icons gets the right icon for .ledger files.
+#+begin_src emacs-lisp :tangle no
+(use-package! ledger-mode
+  :config
+  (add-to-list 'org-babel-load-languages '(ledger . t))
+  (add-to-list
+   'all-the-icons-icon-alist
+   '("\\.dat$" all-the-icons-faicon "bar-chart" :face all-the-icons-cyan :height 0.9))
+  (add-to-list
+   'all-the-icons-mode-icon-alist
+   '(ledger-mode all-the-icons-faicon "bar-chart" :v-adjust -0.1 :face all-the-icons-blue-alt)))
+#+end_src
+
 * Calendar
 #+BEGIN_SRC elisp
 (use-package! calfw
@@ -500,7 +639,25 @@ Org-Roam server. This let's me visualize my notes.
 #+END_SRC
 
 #+RESULTS:
-: ^
+: t
+
+** Eshell Aliases
+#+BEGIN_SRC elisp
+(setq eshell-command-aliases-list
+      '(("ls" "lsd $1")
+        ("q" "exit")
+        ("f" "find-file $1")
+        ("ff" "find-file $1")
+        ("d" "dired $1")
+        ("bd" "eshell-up $1")
+        ("rg" "rg --color=always $*")
+        ("ll" "ls -lah $*")
+        ("gg" "magit-status")
+        ("clear" "clear-scrollback")
+        ("!!" "(eshell-previous-input)")))
+#+END_SRC
+
+** PATH
 
 * Misc
 #+BEGIN_SRC elisp
@@ -509,16 +666,16 @@ Org-Roam server. This let's me visualize my notes.
 
 ;; Change default evil escape sequence to spacemacs style
 (setq evil-escape-key-sequence "fd")
+(setq doom-scratch-initial-major-mode 'org-mode)
 
 
 ;; Make Emacs transparent
-(set-frame-parameter (selected-frame) 'alpha '(75 75))
-(add-to-list 'default-frame-alist '(alpha 75 75))
-
+(set-frame-parameter (selected-frame) 'alpha '(100 100))
+(add-to-list 'default-frame-alist '(alpha 100 100))
 #+END_SRC
 
 #+RESULTS:
-: ((right-divider-width . 1) (bottom-divider-width . 1) (font . -*-VictorMono Nerd Font-semibold-*-*-*-*-120-*-*-*-*-*-*) (tool-bar-lines . 0) (menu-bar-lines . 0) (alpha 75 75) (vertical-scroll-bars) (buffer-predicate . exwm-layout--other-buffer-predicate) (left-fringe . 4) (right-fringe . 4))
+: ((alpha 75 75) (vertical-scroll-bars) (tool-bar-lines . 0) (menu-bar-lines . 0) (left-fringe . 4) (right-fringe . 4))
 
 QT/QML
 Ensure qml is added to the completion engine company
@@ -533,6 +690,10 @@ Ensure qml is added to the completion engine company
 
 (setq company-idle-delay 0.1)
 #+END_SRC
+
+#+RESULTS:
+: 0.1
+
 * Completion
 ** SELECTRUM
 #+BEGIN_SRC elisp :tangle no
@@ -564,7 +725,8 @@ Ensure qml is added to the completion engine company
 ;; (setq helm-display-buffer-default-width 100)
 #+END_SRC
 * Windows
-** HYDRAS
+** HYDRA
+Here we are defining a window moving hydra that helps us to grow, shrink switch and split and even remove windows. It's much better than constantly rehitting the key sequences for normal Doom Emacs.
 #+BEGIN_SRC elisp
 (defhydra +hydra/window-move (:hint nil)
   "
@@ -601,6 +763,10 @@ Ensure qml is added to the completion engine company
   ("L" hydra-move-splitter-right)
 
   ("q" nil))
+
+(map! :leader
+      :prefix "w"
+      :desc "Window Hydra" "a" '+hydra/window-move/body)
 #+END_SRC
 
 * EXWM
@@ -616,7 +782,7 @@ When using exwm, the loading process looks nicer if we set it to launch fullscre
 #+END_SRC
 
 ** MAIN EXWM
-Also, we need a way to display the time.
+Also, we need a way to display the time and battery.
 #+BEGIN_SRC elisp
 (display-time-mode t)
 (setq display-time-interval 60)
@@ -695,60 +861,59 @@ Also, we need a way to display the time.
 
 ;;Global keybindings
 (setq exwm-input-global-keys
-          `(
-            ;; 's-r': Reset (to line-mode).
-            ([?\s-r] . exwm-reset)
-            ;; 's-i': Toggle from line to char modes
-            ([?\s-i] . exwm-input-toggle-keyboard)
-            ;; 's-w': Switch workspace.
-            ([?\s-w] . +hydra/window-move/body)
-            ([?\s-k] . evil-window-prev)
-            ([?\s-j] . evil-window-next)
-            ([?\s-h] . chris/exwm-workspace-prev)
-            ([?\s-l] . chris/exwm-workspace-next)
-            ;; Switch Buffer
-            ([?\s-b] . exwm-workspace-switch-to-buffer)
-            ([?\s-m] . exwm-workspace-move-window)
-            ;; close app
-            ([?\s-c] . kill-this-buffer)
-            ;; Launch Dolphin
-            ([?\s-d] . chris/exwm-launch-dolphin)
-            ;; Launch eshell
-            ([s-return] . +eshell/toggle)
-            ;; screenshot
-            ([print] . chris/exwm-flameshot)
-            ;; Audio
-            ([XF86AudioRaiseVolume] . desktop-environment-volume-increment)
-            ([XF86AudioLowerVolume] . desktop-environment-volume-decrement)
-            ([XF86AudioMute] . desktop-environment-toggle-mute)
-            ([XF86Launch8] . desktop-environment-toggle-microphone-mute)
-            ;; Brightness
-            ([XF86MonBrightnessUp] . desktop-environment-brightness-increment)
-            ([XF86MonBrightnessDown] . desktop-environment-brightness-decrement)
-            ;; 's-&': Launch application.
-            ([?\s-r] . (lambda (command)
-                         (interactive (list (read-shell-command "$ ")))
-                         (start-process-shell-command command nil command)))
-            ([menu] . counsel-linux-app)
-            ;; 's-N': Switch to certain workspace.
-            ,@(mapcar (lambda (i)
-                        `(,(kbd (format "s-%d" i)) .
-                          (lambda ()
-                            (interactive)
-                            (exwm-workspace-switch-create ,i))))
-                      (number-sequence 0 9))))
+      `(
+        ;; 's-r': Reset (to line-mode).
+        ([?\s-r] . exwm-reset)
+        ;; 's-i': Toggle from line to char modes
+        ([?\s-i] . exwm-input-toggle-keyboard)
+        ;; 's-w': Switch workspace.
+        ([?\s-w] . +hydra/window-move/body)
+        ([?\s-k] . evil-window-prev)
+        ([?\s-j] . evil-window-next)
+        ([?\s-h] . chris/exwm-workspace-prev)
+        ([?\s-l] . chris/exwm-workspace-next)
+        ;; Switch Buffer
+        ([?\s-b] . exwm-workspace-switch-to-buffer)
+        ([?\s-m] . exwm-workspace-move-window)
+        ;; close app
+        ([?\s-c] . kill-this-buffer)
+        ;; Launch Dolphin
+        ([?\s-d] . chris/exwm-launch-dolphin)
+        ;; Launch eshell
+        ([s-return] . +eshell/toggle)
+        ;; screenshot
+        ([print] . chris/exwm-flameshot)
+        ;; Audio
+        ([XF86AudioRaiseVolume] . desktop-environment-volume-increment)
+        ([XF86AudioLowerVolume] . desktop-environment-volume-decrement)
+        ([XF86AudioMute] . desktop-environment-toggle-mute)
+        ([XF86Launch8] . desktop-environment-toggle-microphone-mute)
+        ;; Brightness
+        ([XF86MonBrightnessUp] . desktop-environment-brightness-increment)
+        ([XF86MonBrightnessDown] . desktop-environment-brightness-decrement)
+        ;; 's-&': Launch application.
+        ([?\s-r] . (lambda (command)
+                     (interactive (list (read-shell-command "$ ")))
+                     (start-process-shell-command command nil command)))
+        ([menu] . counsel-linux-app)
+        ;; 's-N': Switch to certain workspace.
+        ,@(mapcar (lambda (i)
+                    `(,(kbd (format "s-%d" i)) .
+                      (lambda ()
+                        (interactive)
+                        (exwm-workspace-switch-create ,i))))
+                  (number-sequence 0 9))))
 
 (setq exwm-floating-border-width 0)
 (setq exwm-manage-configurations '(((or (string-match-p "libreoffice"
-                                                   exwm-class-name)
-                                   (string= exwm-class-name "MuseScore3")
-                                   (string= exwm-class-name "Gimp")
-                                   (string= exwm-class-name "feh")
-                                   (string= exwm-class-name "dolphin")
-                                   (string= exwm-title "Event Tester"))
-                               floating t
-                               floating-mode-line nil)))
-
+                                                        exwm-class-name)
+                                        (string= exwm-class-name "MuseScore3")
+                                        (string= exwm-class-name "Gimp")
+                                        (string= exwm-class-name "feh")
+                                        (string= exwm-class-name "dolphin")
+                                        (string= exwm-title "Event Tester"))
+                                    floating t
+                                    floating-mode-line nil)))
 #+END_SRC
 ** LINE MODE SIMULATION
 EXWM has the ability to change keybindings for all X applications and therefore consilidate keybindings. Here, we'll use some of those keybindings to make sure our X applications work well within EXWM.
@@ -760,6 +925,7 @@ EXWM has the ability to change keybindings for all X applications and therefore 
         ([gg] . [home])
         ([S-g] . [end])))
 #+END_SRC
+
 ** AUTO-START
 #+BEGIN_SRC elisp
 (start-process-shell-command "xset" nil "xset r rate 220 90")
@@ -809,6 +975,7 @@ Make sure that Ivy's posframe loads above exwm windows
 #+RESULTS:
 : t
 * Edwina
+Not using this right now.
 #+BEGIN_SRC elisp :tangle no
 (use-package! edwina
   :config
@@ -823,10 +990,18 @@ Needed to allow me to remote to servers using zsh as the main shell
 #+BEGIN_SRC elisp
 (setq tramp-terminal-type "dumb")
 #+END_SRC
+
+#+RESULTS:
+: dumb
+
 * Transmission
+Using transmission.el is much more helpful for interacting with my torrents on my server.
 #+BEGIN_SRC elisp
 (map! :leader "o T" 'transmission)
 (setq transmission-host "192.168.1.35"
       transmission-rpc-path "/transmission/rpc"
       transmission-refresh-modes '(transmission-mode transmission-files-mode transmission-info-mode transmission-peers-mode))
 #+END_SRC
+
+#+RESULTS:
+| transmission-mode | transmission-files-mode | transmission-info-mode | transmission-peers-mode |
