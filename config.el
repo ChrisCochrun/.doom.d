@@ -59,7 +59,7 @@
 (setq-default delete-by-moving-to-trash t
               tab-width 4)
 ;; gdscript
-(require 'gdscript-mode)
+;; (require 'gdscript-mode)
 
 (setq
  all-the-icons-scale-factor 0.8
@@ -77,7 +77,7 @@
 
 (add-hook 'after-change-major-mode-hook #'doom-modeline-conditional-buffer-encoding)
 
-(setq +doom-dashboard-banner-dir "/home/chris/.doom.d/banner/")
+(setq +doom-dashboard-banner-dir "/home/chris/.config/doom/banner/")
 (setq +doom-dashboard-banner-file "whitelionsmall.png")
 
 ;; org
@@ -91,7 +91,7 @@
 
 (setq org-todo-keywords
       '((sequence "TODO(t)" "PROJ(p)" "STRT(s)" "WAIT(w)" "HOLD(h)" "|" "DONE(d)" "CNCL(c)")
- (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
+        (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
 
 
 ;; (add-hook! org-mode (olivetti-mode t))
@@ -113,7 +113,7 @@
 (setq deft-directory "~/org/")
 
 (setq org-agenda-files
-   '("/home/chris/org/DMPREADME.org" "/home/chris/org/DMPTODO.org" "/home/chris/org/inbox.org" "/home/chris/org/notes.org" "/home/chris/org/repetition.org" "/home/chris/org/tasks.org" "/home/chris/org/tfc_plans.org" "/home/chris/org/ministry_team.org" "/home/chris/org/todo.org" "/home/chris/org/newsletter.org"))
+      '("/home/chris/org/DMPREADME.org" "/home/chris/org/DMPTODO.org" "/home/chris/org/inbox.org" "/home/chris/org/notes.org" "/home/chris/org/repetition.org" "/home/chris/org/tasks.org" "/home/chris/org/tfc_plans.org" "/home/chris/org/ministry_team.org" "/home/chris/org/todo.org" "/home/chris/org/newsletter.org"))
 
 (setq org-capture-templates
       '(("t" "Personal todo" entry
@@ -165,6 +165,14 @@
 (setq org-export-with-toc nil)
 (setq org-export-with-author nil)
 
+(use-package! org-wild-notifier
+  :init (org-wild-notifier-mode 1)
+  :custom
+  (alert-default-style 'notifications)
+  (org-wild-notifier-alert-time '(1 10 30))
+  (org-wild-notifier-keyword-whitelist '("TODO" "STRT" "PROJ"))
+  (org-wild-notifier-notification-title "Org Reminder"))
+
 ;; Org-Roam
 (setq org-roam-directory "~/org")
 (setq org-roam-buffer-width 0.25)
@@ -203,10 +211,7 @@
 
 (add-hook! org-roam-mode org-roam-server-mode t)
 
-;; elfeed
 (map! :leader "o F" 'elfeed)
-
-;; Make elfeed update when opened
 (add-hook! 'elfeed-search-mode-hook 'elfeed-update)
 
 ;; function to launch mpv from elfeed
@@ -214,7 +219,7 @@
   "Watch a video from URL in MPV"
   (emms-add-url url))
 
-(defun elfeed-view-mpv (&optional use-generic-p)
+(defun chris/elfeed-view-add-mpv (&optional use-generic-p)
   "Youtube-feed link"
   (interactive "P")
   (let ((entries (elfeed-search-selected)))
@@ -225,16 +230,69 @@
     (mapc #'elfeed-search-update-entry entries)
     (unless (use-region-p) (forward-line))))
 
-;; mapping keys to launch mpv
-(map! :map elfeed-search-mode-map
-      :n "v" 'elfeed-view-mpv)
+;; (defun chris/elfeed-view-add-emms (&optional use-generic-p)
+;;   "Youtube-feed link"
+;;   (interactive "P")
+;;   (let ((entries (elfeed-search-selected)))
+;;     (cl-loop for entry in entries
+;;              do (elfeed-untag entry 'unread)
+;;              do (emms-add-url (car (elt (elfeed-entry-enclosures entry)
+;;                                         (- enclosure-index 1))))
+;;              )
+;;     (mapc #'elfeed-search-update-entry entries)
+;;     (unless (use-region-p) (forward-line)))
+
+(defun elfeed-show-add-enclosure-to-playlist (enclosure-index)
+  "Add enclosure number ENCLOSURE-INDEX to current EMMS playlist.
+Prompts for ENCLOSURE-INDEX when called interactively."
+
+  (interactive (list (elfeed--enclosure-maybe-prompt-index elfeed-show-entry)))
+  (require 'emms) ;; optional
+  (with-no-warnings ;; due to lazy (require )
+    (emms-add-url   (car (elt (elfeed-entry-enclosures elfeed-show-entry)
+                              (- enclosure-index 1))))))
+
+  ;; mapping keys to launch mpv
+  (map! :map elfeed-search-mode-map
+        :n "v" 'chris/elfeed-view-add-mpv
+        :n "e" 'chris/elfeed-view-add-emms)
 
 (map! :leader "o M" 'emms)
 (require 'emms-setup)
 (emms-all)
 (emms-default-players)
+(setq emms-volume-change-function 'emms-volume-pulse-change)
 
-(map! :leader "P" 'emms-pause)
+(map! :leader
+      (:prefix ("e" . "EMMS")
+       :desc "Pause" "p" 'emms-pause))
+
+(defhydra +hydra/emms-controls (:hint nil)
+  "
+   audio: _j_:lower     _k_:raise
+    seek: _h_:backward  _l_:forward  _H_:back 30sec
+    play: _p_ause/_p_lay
+
+    quit: _q_
+"
+  ("h" emms-seek-backward)
+  ("j" emms-volume-lower)
+  ("k" emms-volume-raise)
+  ("l" emms-seek-forward)
+  ("H" chris/emms-seek-backward)
+
+  ("p" emms-pause)
+
+  ("q" nil))
+
+(map! :leader
+      :desc "EMMS Controls" "e a" '+hydra/emms-controls/body
+      :desc "Seek Back Hydra" "e h" '+hydra/emms-cotrols/emms-seek-backward
+      :desc "Seek Back 30s Hydra" "e H" '+hydra/emms-cotrols/chris/emms-seek-backward
+      :desc "Seek Forward Hydra" "e l" '+hydra/emms-cotrols/emms-seek-forward
+      :desc "Volume Down Hydra" "e j" '+hydra/emms-cotrols/emms-volume-lower
+      :desc "Volume Up Hydra" "e k" '+hydra/emms-cotrols/emms-volume-raise
+      :desc "Pause Hydra" "e P" '+hydra/emms-cotrols/emms-pause)
 
 ;; Add gmail
 (set-email-account! "gmail"
@@ -303,6 +361,7 @@
 (add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
 (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display)
 (setq mu4e-alert-email-notification-types '(count))
+(setq mu4e-update-interval 600)
 
 (setq mu4e-alert-interesting-mail-query
       (concat
@@ -402,26 +461,28 @@
 
 (setq eshell-command-aliases-list
       '(("ls" "lsd $1")
-       ("q" "exit")
-       ("f" "find-file $1")
-       ("ff" "find-file $1")
-       ("d" "dired $1")
-       ("bd" "eshell-up $1")
-       ("rg" "rg --color=always $*")
-       ("ll" "ls -lah $*")
-       ("gg" "magit-status")
-       ("clear" "clear-scrollback")))
+        ("q" "exit")
+        ("f" "find-file $1")
+        ("ff" "find-file $1")
+        ("d" "dired $1")
+        ("bd" "eshell-up $1")
+        ("rg" "rg --color=always $*")
+        ("ll" "ls -lah $*")
+        ("gg" "magit-status")
+        ("clear" "clear-scrollback")
+        ("!!" "(eshell-previous-input)")))
 
 ;; Set Vterm to zsh
 (setq vterm-shell "/bin/fish")
 
 ;; Change default evil escape sequence to spacemacs style
 (setq evil-escape-key-sequence "fd")
+(setq doom-scratch-initial-major-mode 'org-mode)
 
 
 ;; Make Emacs transparent
-(set-frame-parameter (selected-frame) 'alpha '(75 75))
-(add-to-list 'default-frame-alist '(alpha 75 75))
+(set-frame-parameter (selected-frame) 'alpha '(100 100))
+(add-to-list 'default-frame-alist '(alpha 100 100))
 
 (add-to-list 'company-backends 'company-qml)
 
@@ -474,6 +535,10 @@
   ("L" hydra-move-splitter-right)
 
   ("q" nil))
+
+(map! :leader
+      :prefix "w"
+      :desc "Window Hydra" "a" '+hydra/window-move/body)
 
 (use-package! ivy-posframe
     :config
