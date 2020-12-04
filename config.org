@@ -70,6 +70,11 @@ Welcome to my doom emacs config. I'm using literate programming because it allow
 ;; gdscript
 ;; (require 'gdscript-mode)
 #+END_SRC
+* Native Compile
+Since we are using gccemacs with native compile. Let's make sure external packages can be native compiled.
+#+begin_src emacs-lisp
+(setq package-native-compile t)
+#+end_src
 
 * Doom Modeline
 

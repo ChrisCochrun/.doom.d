@@ -15,8 +15,8 @@
 ;; (setq doom-font (font-spec :family "monospace" :size 12 :weight 'semi-light)
 ;;       doom-variable-pitch-font (font-spec :family "sans" :size 13))
 
-(setq doom-font (font-spec :family "VictorMono Nerd Font" :size 12.0 :weight 'semi-bold)
-      doom-variable-pitch-font (font-spec :family "NotoSans Nerd Font" :size 13.0 :weight 'light))
+(setq doom-font (font-spec :family "VictorMono Nerd Font" :size 24.0 :weight 'semi-bold)
+      doom-variable-pitch-font (font-spec :family "NotoSans Nerd Font" :size 26.0 :weight 'light))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -579,3 +579,5 @@ Prompts for ENCLOSURE-INDEX when called interactively."
 (setq transmission-host "192.168.1.35"
       transmission-rpc-path "/transmission/rpc"
       transmission-refresh-modes '(transmission-mode transmission-files-mode transmission-info-mode transmission-peers-mode))
+
+(setq package-native-compile t)
