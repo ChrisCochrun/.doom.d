@@ -73,6 +73,10 @@
   :recipe (:host github :repo "shtwzrd/friar" :branch "master"
            :files (:defaults "*.lua" "*.fnl")))
 
+(package! matrix-client
+  :recipe (:host github :repo "alphapapa/matrix-client.el"
+                         :files (:defaults "logo.png" "matrix-client-standalone.el.sh")))
+
 ;; (package! helm :disable t)
 ;; (package! helm-easymenu :disable t)
 
