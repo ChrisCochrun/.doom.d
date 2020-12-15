@@ -3,6 +3,43 @@
 #+PROPERTY: header-args :tangle config.el
 #+DESCRIPTION: This is my literate emacs config
 
+* Table of Contents :TOC:
+- [[#start-of-file][Start of File]]
+- [[#native-compile][Native Compile]]
+- [[#doom-modeline][Doom Modeline]]
+- [[#doom-dashboard][Doom Dashboard]]
+- [[#org-mode][Org Mode]]
+  - [[#org-capture][Org Capture]]
+  - [[#org-super-agenda][Org Super Agenda]]
+  - [[#org-export][Org Export]]
+  - [[#custom-org-markers][Custom Org Markers]]
+  - [[#org-wild-notifier][Org Wild Notifier]]
+- [[#org-roam][Org Roam]]
+- [[#zen-mode][Zen Mode]]
+- [[#elfeed][Elfeed]]
+- [[#emms][EMMS]]
+- [[#mu4e][Mu4e]]
+- [[#ledger][Ledger]]
+- [[#calendar][Calendar]]
+- [[#eshell][EShell]]
+  - [[#eshell-aliases][Eshell Aliases]]
+  - [[#path][PATH]]
+- [[#misc][Misc]]
+- [[#completion][Completion]]
+  - [[#selectrum][SELECTRUM]]
+  - [[#ivy][IVY]]
+  - [[#helm][HELM]]
+- [[#windows][Windows]]
+  - [[#hydra][HYDRA]]
+- [[#exwm][EXWM]]
+  - [[#main-exwm][MAIN EXWM]]
+  - [[#line-mode-simulation][LINE MODE SIMULATION]]
+  - [[#auto-start][AUTO-START]]
+  - [[#ivy-specific][IVY SPECIFIC]]
+- [[#edwina][Edwina]]
+- [[#tramp][Tramp]]
+- [[#transmission][Transmission]]
+
 * Start of File
 Welcome to my doom emacs config. I'm using literate programming because it allows me to more cleanly edit each piece without individual files and allowing me to describe better what each block of code does.
 
