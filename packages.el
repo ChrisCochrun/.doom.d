@@ -73,9 +73,6 @@
   :recipe (:host github :repo "shtwzrd/friar" :branch "master"
            :files (:defaults "*.lua" "*.fnl")))
 
-;; (package! helm :disable t)
-;; (package! helm-easymenu :disable t)
-
 
 ;; Experiment with selectrum instead of ivy
 ;; (package! prescient)

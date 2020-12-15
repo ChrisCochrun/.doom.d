@@ -15,8 +15,8 @@
 ;; (setq doom-font (font-spec :family "monospace" :size 12 :weight 'semi-light)
 ;;       doom-variable-pitch-font (font-spec :family "sans" :size 13))
 
-(setq doom-font (font-spec :family "VictorMono Nerd Font" :size 24.0 :weight 'semi-bold)
-      doom-variable-pitch-font (font-spec :family "NotoSans Nerd Font" :size 26.0 :weight 'light))
+(setq doom-font (font-spec :family "VictorMono Nerd Font" :size 12.0 :weight 'semi-bold)
+      doom-variable-pitch-font (font-spec :family "NotoSans Nerd Font" :size 13.0 :weight 'light))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -299,53 +299,53 @@ Prompts for ENCLOSURE-INDEX when called interactively."
 
 ;; Add gmail
 (set-email-account! "gmail"
-  '((mu4e-sent-folder       . "/gmail/[Gmail].Sent Mail/")
-    (smtpmail-smtp-user     . "ccochrun21@gmail.com")
-    (user-mail-address      . "ccochrun21@gmail.com")    ;; only needed for mu < 1.4
-    (mu4e-compose-signature . "---\nChris Cochrun"))
-  nil)
+                    '((mu4e-sent-folder       . "/gmail/[Gmail].Sent Mail/")
+                      (smtpmail-smtp-user     . "ccochrun21@gmail.com")
+                      (user-mail-address      . "ccochrun21@gmail.com")    ;; only needed for mu < 1.4
+                      (mu4e-compose-signature . "---\nChris Cochrun"))
+                    nil)
 
 ;; Add personal outlook account
 (set-email-account! "office365"
-  '((mu4e-sent-folder       . "/outlook/Sent")
-    (mu4e-drafts-folder     . "/outlook/Drafts")
-    (mu4e-trash-folder      . "/outlook/Deleted")
-    (mu4e-refile-folder     . "/outlook/Archive")
-    (smtpmail-smtp-user     . "chris.cochrun@outlook.com")
-    (user-mail-address      . "chris.cochrun@outlook.com")    ;; only needed for mu < 1.4
-    (mu4e-compose-signature . "---\nChris Cochrun"))
-  nil)
+                    '((mu4e-sent-folder       . "/outlook/Sent")
+                      (mu4e-drafts-folder     . "/outlook/Drafts")
+                      (mu4e-trash-folder      . "/outlook/Deleted")
+                      (mu4e-refile-folder     . "/outlook/Archive")
+                      (smtpmail-smtp-user     . "chris.cochrun@outlook.com")
+                      (user-mail-address      . "chris.cochrun@outlook.com")    ;; only needed for mu < 1.4
+                      (mu4e-compose-signature . "---\nChris Cochrun"))
+                    nil)
 
 ;; Add my o365 account from work
 (set-email-account! "office365"
-  '((mu4e-sent-folder       . "/office/Sent Items")
-    (mu4e-drafts-folder     . "/office/Drafts")
-    (mu4e-trash-folder      . "/office/Deleted Items")
-    (mu4e-refile-folder     . "/office/Archive")
-    (smtpmail-smtp-user     . "chris@tfcconnection.org")
-    (user-mail-address      . "chris@tfcconnection.org")    ;; only needed for mu < 1.4
-    (mu4e-compose-signature . "---\nChris Cochrun"))
-  t)
+                    '((mu4e-sent-folder       . "/office/Sent Items")
+                      (mu4e-drafts-folder     . "/office/Drafts")
+                      (mu4e-trash-folder      . "/office/Deleted Items")
+                      (mu4e-refile-folder     . "/office/Archive")
+                      (smtpmail-smtp-user     . "chris@tfcconnection.org")
+                      (user-mail-address      . "chris@tfcconnection.org")    ;; only needed for mu < 1.4
+                      (mu4e-compose-signature . "---\nChris Cochrun"))
+                    t)
 
 ;; Add the ability to send email for o365
 (setq message-send-mail-function 'smtpmail-send-it
-   starttls-use-gnutls t
-   smtpmail-starttls-credentials '(("smtp.office365.com" 587 nil nil))
-   smtpmail-auth-credentials
-     '(("smtp.office365.com" 587 "chris@tfcconnection.org" nil))
-   smtpmail-default-smtp-server "smtp.office365.com"
-   smtpmail-smtp-server "smtp.office365.com"
-   smtpmail-smtp-service 587)
+      starttls-use-gnutls t
+      smtpmail-starttls-credentials '(("smtp.office365.com" 587 nil nil))
+      smtpmail-auth-credentials
+      '(("smtp.office365.com" 587 "chris@tfcconnection.org" nil))
+      smtpmail-default-smtp-server "smtp.office365.com"
+      smtpmail-smtp-server "smtp.office365.com"
+      smtpmail-smtp-service 587)
 
 ;; shortcuts in the jumplist by pressing "J" in the mu4e buffer
 (setq mu4e-maildir-shortcuts
-    '((:maildir "/office/Archive"               :key ?a)
-     (:maildir "/office/INBOX"                  :key ?i)
-     (:maildir "/outlook/INBOX"                 :key ?l)
-     (:maildir "/office/Junk Email"             :key ?j)
-     (:maildir "/office/INBOX/Website Forms"    :key ?f)
-     (:maildir "/gmail/INBOX"                   :key ?g)
-     (:maildir "/office/sent"                   :key ?s)))
+      '((:maildir "/office/Archive"               :key ?a)
+        (:maildir "/office/INBOX"                  :key ?i)
+        (:maildir "/outlook/INBOX"                 :key ?l)
+        (:maildir "/office/Junk Email"             :key ?j)
+        (:maildir "/office/INBOX/Website Forms"    :key ?f)
+        (:maildir "/gmail/INBOX"                   :key ?g)
+        (:maildir "/office/sent"                   :key ?s)))
 
 (add-hook! 'mu4e-view-mode-hook evil-normal-state)
 
@@ -358,7 +358,7 @@ Prompts for ENCLOSURE-INDEX when called interactively."
         (:name "Today's messages" :query "date:today..now" :key 116)
         (:name "Last 7 days" :query "date:7d..now" :hide-unread t :key 119)
         (:name "Messages with images" :query "mime:image/*" :key 112))
-      mu4e-attachment-dir "/home/chris/storage/Nextcloud/attachments")
+      mu4e-attachment-dir "/home/chris/Nextcloud/attachments")
 
 (mu4e-alert-set-default-style 'notifications)
 (add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
@@ -475,6 +475,8 @@ Prompts for ENCLOSURE-INDEX when called interactively."
         ("clear" "clear-scrollback")
         ("!!" "(eshell-previous-input)")))
 
+
+
 ;; Set Vterm to zsh
 (setq vterm-shell "/bin/fish")
 
@@ -581,3 +583,18 @@ Prompts for ENCLOSURE-INDEX when called interactively."
       transmission-refresh-modes '(transmission-mode transmission-files-mode transmission-info-mode transmission-peers-mode))
 
 (setq package-native-compile t)
+
+(setq pdf-misc-print-programm "/usr/bin/lpr")
+(setq pdf-misc-print-programm-args (quote ("-o media=Letter" "-o sides=two-sided-long-edge")))
+
+(defun chris/pdf-misc-print-document (filename &optional interactive-p)
+  (interactive
+   (list (pdf-view-buffer-file-name) t))
+  (cl-check-type filename (and string file-readable))
+  (let ((program (pdf-misc-print-programm interactive-p))
+        (args (append pdf-misc-print-programm-args (list filename))))
+    (unless program
+      (error "No print program available"))
+    (apply #'start-process "printing" nil program args)
+    (message "Print job started: %s %s"
+             program (mapconcat #'identity args " "))))

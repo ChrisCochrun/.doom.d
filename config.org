@@ -435,53 +435,53 @@ Let's make an emms hydra for typical controls and map them to the EMMS leader so
 #+BEGIN_SRC elisp
 ;; Add gmail
 (set-email-account! "gmail"
-  '((mu4e-sent-folder       . "/gmail/[Gmail].Sent Mail/")
-    (smtpmail-smtp-user     . "ccochrun21@gmail.com")
-    (user-mail-address      . "ccochrun21@gmail.com")    ;; only needed for mu < 1.4
-    (mu4e-compose-signature . "---\nChris Cochrun"))
-  nil)
+                    '((mu4e-sent-folder       . "/gmail/[Gmail].Sent Mail/")
+                      (smtpmail-smtp-user     . "ccochrun21@gmail.com")
+                      (user-mail-address      . "ccochrun21@gmail.com")    ;; only needed for mu < 1.4
+                      (mu4e-compose-signature . "---\nChris Cochrun"))
+                    nil)
 
 ;; Add personal outlook account
 (set-email-account! "office365"
-  '((mu4e-sent-folder       . "/outlook/Sent")
-    (mu4e-drafts-folder     . "/outlook/Drafts")
-    (mu4e-trash-folder      . "/outlook/Deleted")
-    (mu4e-refile-folder     . "/outlook/Archive")
-    (smtpmail-smtp-user     . "chris.cochrun@outlook.com")
-    (user-mail-address      . "chris.cochrun@outlook.com")    ;; only needed for mu < 1.4
-    (mu4e-compose-signature . "---\nChris Cochrun"))
-  nil)
+                    '((mu4e-sent-folder       . "/outlook/Sent")
+                      (mu4e-drafts-folder     . "/outlook/Drafts")
+                      (mu4e-trash-folder      . "/outlook/Deleted")
+                      (mu4e-refile-folder     . "/outlook/Archive")
+                      (smtpmail-smtp-user     . "chris.cochrun@outlook.com")
+                      (user-mail-address      . "chris.cochrun@outlook.com")    ;; only needed for mu < 1.4
+                      (mu4e-compose-signature . "---\nChris Cochrun"))
+                    nil)
 
 ;; Add my o365 account from work
 (set-email-account! "office365"
-  '((mu4e-sent-folder       . "/office/Sent Items")
-    (mu4e-drafts-folder     . "/office/Drafts")
-    (mu4e-trash-folder      . "/office/Deleted Items")
-    (mu4e-refile-folder     . "/office/Archive")
-    (smtpmail-smtp-user     . "chris@tfcconnection.org")
-    (user-mail-address      . "chris@tfcconnection.org")    ;; only needed for mu < 1.4
-    (mu4e-compose-signature . "---\nChris Cochrun"))
-  t)
+                    '((mu4e-sent-folder       . "/office/Sent Items")
+                      (mu4e-drafts-folder     . "/office/Drafts")
+                      (mu4e-trash-folder      . "/office/Deleted Items")
+                      (mu4e-refile-folder     . "/office/Archive")
+                      (smtpmail-smtp-user     . "chris@tfcconnection.org")
+                      (user-mail-address      . "chris@tfcconnection.org")    ;; only needed for mu < 1.4
+                      (mu4e-compose-signature . "---\nChris Cochrun"))
+                    t)
 
 ;; Add the ability to send email for o365
 (setq message-send-mail-function 'smtpmail-send-it
-   starttls-use-gnutls t
-   smtpmail-starttls-credentials '(("smtp.office365.com" 587 nil nil))
-   smtpmail-auth-credentials
-     '(("smtp.office365.com" 587 "chris@tfcconnection.org" nil))
-   smtpmail-default-smtp-server "smtp.office365.com"
-   smtpmail-smtp-server "smtp.office365.com"
-   smtpmail-smtp-service 587)
+      starttls-use-gnutls t
+      smtpmail-starttls-credentials '(("smtp.office365.com" 587 nil nil))
+      smtpmail-auth-credentials
+      '(("smtp.office365.com" 587 "chris@tfcconnection.org" nil))
+      smtpmail-default-smtp-server "smtp.office365.com"
+      smtpmail-smtp-server "smtp.office365.com"
+      smtpmail-smtp-service 587)
 
 ;; shortcuts in the jumplist by pressing "J" in the mu4e buffer
 (setq mu4e-maildir-shortcuts
-    '((:maildir "/office/Archive"               :key ?a)
-     (:maildir "/office/INBOX"                  :key ?i)
-     (:maildir "/outlook/INBOX"                 :key ?l)
-     (:maildir "/office/Junk Email"             :key ?j)
-     (:maildir "/office/INBOX/Website Forms"    :key ?f)
-     (:maildir "/gmail/INBOX"                   :key ?g)
-     (:maildir "/office/sent"                   :key ?s)))
+      '((:maildir "/office/Archive"               :key ?a)
+        (:maildir "/office/INBOX"                  :key ?i)
+        (:maildir "/outlook/INBOX"                 :key ?l)
+        (:maildir "/office/Junk Email"             :key ?j)
+        (:maildir "/office/INBOX/Website Forms"    :key ?f)
+        (:maildir "/gmail/INBOX"                   :key ?g)
+        (:maildir "/office/sent"                   :key ?s)))
 
 (add-hook! 'mu4e-view-mode-hook evil-normal-state)
 
@@ -494,8 +494,11 @@ Let's make an emms hydra for typical controls and map them to the EMMS leader so
         (:name "Today's messages" :query "date:today..now" :key 116)
         (:name "Last 7 days" :query "date:7d..now" :hide-unread t :key 119)
         (:name "Messages with images" :query "mime:image/*" :key 112))
-      mu4e-attachment-dir "/home/chris/storage/Nextcloud/attachments")
+      mu4e-attachment-dir "/home/chris/Nextcloud/attachments")
 #+END_SRC
+
+#+RESULTS:
+: /home/chris/Nextcloud/attachments
 
 Let's setup some notifications for Mu4e and then set the update interval to every 10 minutes.
 #+BEGIN_SRC elisp
@@ -663,7 +666,11 @@ First thing is let's make sure org-mode can speak ledger, then we'll make sure d
 #+END_SRC
 
 ** PATH
+* Matrix
+Here are settings to make matrix-client.el work
+#+begin_src elisp
 
+#+end_src
 * Misc
 #+BEGIN_SRC elisp
 ;; Set Vterm to zsh
@@ -680,7 +687,7 @@ First thing is let's make sure org-mode can speak ledger, then we'll make sure d
 #+END_SRC
 
 #+RESULTS:
-: ((alpha 75 75) (vertical-scroll-bars) (tool-bar-lines . 0) (menu-bar-lines . 0) (left-fringe . 4) (right-fringe . 4))
+: ((right-divider-width . 1) (bottom-divider-width . 1) (font . -*-VictorMono Nerd Font-semibold-*-*-*-*-120-*-*-*-*-*-*) (alpha 100 100) (buffer-predicate . doom-buffer-frame-predicate) (vertical-scroll-bars) (tool-bar-lines . 0) (menu-bar-lines . 0) (left-fringe . 4) (right-fringe . 4))
 
 QT/QML
 Ensure qml is added to the completion engine company
@@ -698,6 +705,23 @@ Ensure qml is added to the completion engine company
 
 #+RESULTS:
 : 0.1
+** Printing
+#+begin_src emacs-lisp
+(setq pdf-misc-print-programm "/usr/bin/lpr")
+(setq pdf-misc-print-programm-args (quote ("-o media=Letter" "-o sides=two-sided-long-edge")))
+
+(defun chris/pdf-misc-print-document (filename &optional interactive-p)
+  (interactive
+   (list (pdf-view-buffer-file-name) t))
+  (cl-check-type filename (and string file-readable))
+  (let ((program (pdf-misc-print-programm interactive-p))
+        (args (append pdf-misc-print-programm-args (list filename))))
+    (unless program
+      (error "No print program available"))
+    (apply #'start-process "printing" nil program args)
+    (message "Print job started: %s %s"
+             program (mapconcat #'identity args " "))))
+#+end_src
 
 * Completion
 ** SELECTRUM
