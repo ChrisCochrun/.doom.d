@@ -16,7 +16,7 @@
 ;;       doom-variable-pitch-font (font-spec :family "sans" :size 13))
 
 (setq doom-font (font-spec :family "VictorMono Nerd Font" :size 12.0 :weight 'semi-bold)
-      doom-variable-pitch-font (font-spec :family "NotoSans Nerd Font" :size 13.0 :weight 'light))
+      doom-variable-pitch-font (font-spec :family "NotoSans Display Nerd Font" :size 13.0 :weight 'light))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -85,8 +85,6 @@
 (setq olivetti-body-width 0.6)
 (setq olivetti-minimum-body-width 100)
 (setq org-imenu-depth 3)
-(setq org-export-with-toc nil)
-(setq org-export-with-author nil)
 (setq org-odt-styles-file "/home/chris/org/style.odt")
 (add-hook! org-mode (setq hl-line-mode nil))
 
@@ -118,33 +116,35 @@
 (setq org-agenda-files
       '("/home/chris/org/DMPREADME.org" "/home/chris/org/DMPTODO.org" "/home/chris/org/inbox.org" "/home/chris/org/notes.org" "/home/chris/org/repetition.org" "/home/chris/org/tasks.org" "/home/chris/org/tfc_plans.org" "/home/chris/org/ministry_team.org" "/home/chris/org/todo.org" "/home/chris/org/newsletter.org"))
 
-(setq org-capture-templates
-      '(("t" "Personal todo" entry
-         (file+headline +org-capture-todo-file "Inbox")
-         "* TODO %^{TODO name}\n%a\n%i%?" :prepend t)
-        ("n" "Personal notes" entry
-         (file+headline +org-capture-notes-file "Inbox")
-         "* %u %?\n%i\n%a" :prepend t)
-        ("j" "Journal" entry
-         (file+olp+datetree +org-capture-journal-file)
-         "* %U %?\n%i\n%a" :prepend t)
-        ("p" "Templates for projects")
-        ("pt" "Project-local todo" entry
-         (file+headline +org-capture-project-todo-file "Inbox")
-         "* TODO %?\n%i\n%a" :prepend t)
-        ("pn" "Project-local notes" entry
-         (file+headline +org-capture-project-notes-file "Inbox")
-         "* %U %?\n%i\n%a" :prepend t)
-        ("pc" "Project-local changelog" entry
-         (file+headline +org-capture-project-changelog-file "Unreleased")
-         "* %U %?\n%i\n%a" :prepend t)
-        ("o" "Centralized templates for projects")
-        ("ot" "Project todo" entry #'+org-capture-central-project-todo-file
-         "* TODO %?\n %i\n %a" :heading "Tasks" :prepend nil)
-        ("on" "Project notes" entry #'+org-capture-central-project-notes-file
-         "* %U %?\n %i\n %a" :heading "Notes" :prepend t)
-        ("oc" "Project changelog" entry #'+org-capture-central-project-changelog-file
-         "* %U %?\n %i\n %a" :heading "Changelog" :prepend t)))
+(use-package! org
+  :config
+  (setq org-capture-templates
+        '(("t" "Personal todo" entry
+           (file+headline +org-capture-todo-file "Inbox")
+           "* TODO %^{TODO name}\n%a\n%i%?" :prepend t)
+          ("n" "Personal notes" entry
+           (file+headline +org-capture-notes-file "Inbox")
+           "* %u %?\n%i\n%a" :prepend t)
+          ("j" "Journal" entry
+           (file+olp+datetree +org-capture-journal-file)
+           "* %U %?\n%i\n%a" :prepend t)
+          ("p" "Templates for projects")
+          ("pt" "Project-local todo" entry
+           (file+headline +org-capture-project-todo-file "Inbox")
+           "* TODO %?\n%i\n%a" :prepend t)
+          ("pn" "Project-local notes" entry
+           (file+headline +org-capture-project-notes-file "Inbox")
+           "* %U %?\n%i\n%a" :prepend t)
+          ("pc" "Project-local changelog" entry
+           (file+headline +org-capture-project-changelog-file "Unreleased")
+           "* %U %?\n%i\n%a" :prepend t)
+          ("o" "Centralized templates for projects")
+          ("ot" "Project todo" entry #'+org-capture-central-project-todo-file
+           "* TODO %?\n %i\n %a" :heading "Tasks" :prepend nil)
+          ("on" "Project notes" entry #'+org-capture-central-project-notes-file
+           "* %U %?\n %i\n %a" :heading "Notes" :prepend t)
+          ("oc" "Project changelog" entry #'+org-capture-central-project-changelog-file
+           "* %U %?\n %i\n %a" :heading "Changelog" :prepend t))))
 
 (use-package! org-super-agenda
   :after org-agenda
@@ -179,6 +179,8 @@
 ;; Org-Roam
 (setq org-roam-directory "~/org")
 (setq org-roam-buffer-width 0.25)
+(map! :leader
+      :n "n r D" 'org-roam-db-build-cache)
 
 (setq org-roam-capture-templates
       '(("d" "default" plain (function org-roam--capture-get-point)
@@ -192,13 +194,13 @@
 
 (setq org-roam-dailies-capture-templates
       '(("d" "daily" plain #'org-roam-capture--get-point ""
-        :immediate-finish t
-        :file-name "%<%m-%d-%Y>"
-        :head "#+TITLE: %<%m-%d-%Y>\n#+AUTHOR: Chris Cochrun mailto://chris@tfcconnection.org\n#+CREATED: %<%D - %I:%M %p>\n\n* HFL\n* Tasks\n* Family\n** How Do I Love Abbie?")
+         :immediate-finish t
+         :file-name "%<%m-%d-%Y>"
+         :head "#+TITLE: %<%m-%d-%Y>\n#+AUTHOR: Chris Cochrun\n#+CREATED: %<%D - %I:%M %p>\n\n* HFL\n* Tasks\n* Family\n** How Do I Love Abbie?")
         ("b" "biblical daily" plain #'org-roam-capture--get-point ""
          :immediate-finish t
-        :file-name "%<%m-%d-%Y>-bib"
-        :head "#+TITLE: %<%m-%d-%Y> - Biblical\n#+AUTHOR: Chris Cochrun mailto://chris@tfcconnection.org")))
+         :file-name "%<%m-%d-%Y>-bib"
+         :head "#+TITLE: %<%m-%d-%Y> - Biblical\n#+AUTHOR: Chris Cochrun")))
 
 (use-package! org-roam-server
   :config
@@ -213,6 +215,33 @@
   :after org-roam)
 
 (add-hook! org-roam-mode org-roam-server-mode t)
+
+(defun chris/+org-roam-capture-open-frame (&optional initial-input key)
+  "Opens the org-capture window in a floating frame that cleans itself up once
+you're done. This can be called from an external shell script."
+  (interactive)
+  (when (and initial-input (string-empty-p initial-input))
+    (setq initial-input nil))
+  (when (and key (string-empty-p key))
+    (setq key nil))
+  (let* ((frame-title-format "")
+         (frame (if (+org-capture-frame-p)
+                    (selected-frame)
+                  (make-frame +org-capture-frame-parameters))))
+    (select-frame-set-input-focus frame)  ; fix MacOS not focusing new frames
+    (with-selected-frame frame
+      (require 'org-capture)
+      (condition-case ex
+          (letf! ((#'pop-to-buffer #'switch-to-buffer))
+            (switch-to-buffer (doom-fallback-buffer))
+            (let ((org-capture-initial initial-input)
+                  org-capture-entry)
+              (when (and key (not (string-empty-p key)))
+                (setq org-capture-entry (org-capture-select-template key)))
+              (org-roam-capture)))
+        ('error
+         (message "org-capture: %s" (error-message-string ex))
+         (delete-frame frame))))))
 
 (map! :leader "o F" 'elfeed)
 (add-hook! 'elfeed-search-mode-hook 'elfeed-update)
@@ -345,7 +374,7 @@ Prompts for ENCLOSURE-INDEX when called interactively."
         (:maildir "/office/Junk Email"             :key ?j)
         (:maildir "/office/INBOX/Website Forms"    :key ?f)
         (:maildir "/gmail/INBOX"                   :key ?g)
-        (:maildir "/office/sent"                   :key ?s)))
+        (:maildir "/office/Sent Items"                   :key ?s)))
 
 (add-hook! 'mu4e-view-mode-hook evil-normal-state)
 
@@ -375,7 +404,7 @@ Prompts for ENCLOSURE-INDEX when called interactively."
 
 (use-package! calfw
   :config
-  (defun my-open-calendar ()
+  (defun chris/calfw-calendar-open ()
     (interactive)
     (cfw:open-calendar-buffer
      :contents-sources
@@ -387,7 +416,7 @@ Prompts for ENCLOSURE-INDEX when called interactively."
 
 (map! :leader
       (:prefix ("a" . "Calendar")
-       :desc "Open Calendar" "c" 'my-open-calendar))
+       :desc "Open Calendar" "c" 'chris/calfw-calendar-open))
 (map! :map cfw:calendar-mode-map
       "SPC" 'doom/leader
       "q" 'kill-this-buffer
@@ -464,6 +493,7 @@ Prompts for ENCLOSURE-INDEX when called interactively."
 
 (setq eshell-command-aliases-list
       '(("ls" "lsd $1")
+        ("la" "lsd -la $1")
         ("q" "exit")
         ("f" "find-file $1")
         ("ff" "find-file $1")

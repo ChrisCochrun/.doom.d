@@ -3,6 +3,43 @@
 #+PROPERTY: header-args :tangle config.el
 #+DESCRIPTION: This is my literate emacs config
 
+* Table of Contents :TOC:
+- [[#start-of-file][Start of File]]
+- [[#native-compile][Native Compile]]
+- [[#doom-modeline][Doom Modeline]]
+- [[#doom-dashboard][Doom Dashboard]]
+- [[#org-mode][Org Mode]]
+  - [[#org-capture][Org Capture]]
+  - [[#org-super-agenda][Org Super Agenda]]
+  - [[#org-export][Org Export]]
+  - [[#custom-org-markers][Custom Org Markers]]
+  - [[#org-wild-notifier][Org Wild Notifier]]
+- [[#org-roam][Org Roam]]
+- [[#zen-mode][Zen Mode]]
+- [[#elfeed][Elfeed]]
+- [[#emms][EMMS]]
+- [[#mu4e][Mu4e]]
+- [[#ledger][Ledger]]
+- [[#calendar][Calendar]]
+- [[#eshell][EShell]]
+  - [[#eshell-aliases][Eshell Aliases]]
+  - [[#path][PATH]]
+- [[#misc][Misc]]
+- [[#completion][Completion]]
+  - [[#selectrum][SELECTRUM]]
+  - [[#ivy][IVY]]
+  - [[#helm][HELM]]
+- [[#windows][Windows]]
+  - [[#hydra][HYDRA]]
+- [[#exwm][EXWM]]
+  - [[#main-exwm][MAIN EXWM]]
+  - [[#line-mode-simulation][LINE MODE SIMULATION]]
+  - [[#auto-start][AUTO-START]]
+  - [[#ivy-specific][IVY SPECIFIC]]
+- [[#edwina][Edwina]]
+- [[#tramp][Tramp]]
+- [[#transmission][Transmission]]
+
 * Start of File
 Welcome to my doom emacs config. I'm using literate programming because it allows me to more cleanly edit each piece without individual files and allowing me to describe better what each block of code does.
 
@@ -25,7 +62,7 @@ Welcome to my doom emacs config. I'm using literate programming because it allow
 ;;       doom-variable-pitch-font (font-spec :family "sans" :size 13))
 
 (setq doom-font (font-spec :family "VictorMono Nerd Font" :size 12.0 :weight 'semi-bold)
-      doom-variable-pitch-font (font-spec :family "NotoSans Nerd Font" :size 13.0 :weight 'light))
+      doom-variable-pitch-font (font-spec :family "NotoSans Display Nerd Font" :size 13.0 :weight 'light))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -76,6 +113,9 @@ Since we are using gccemacs with native compile. Let's make sure external packag
 (setq package-native-compile t)
 #+end_src
 
+#+RESULTS:
+: t
+
 * Doom Modeline
 
 Doom's modeline is great, but with just a bit of tweaking, it's even better.
@@ -116,8 +156,6 @@ LF UTF-8 is the default file encoding. So it's not worth showing in the modeline
 (setq olivetti-body-width 0.6)
 (setq olivetti-minimum-body-width 100)
 (setq org-imenu-depth 3)
-(setq org-export-with-toc nil)
-(setq org-export-with-author nil)
 (setq org-odt-styles-file "/home/chris/org/style.odt")
 (add-hook! org-mode (setq hl-line-mode nil))
 
@@ -148,43 +186,44 @@ LF UTF-8 is the default file encoding. So it's not worth showing in the modeline
 
 (setq org-agenda-files
       '("/home/chris/org/DMPREADME.org" "/home/chris/org/DMPTODO.org" "/home/chris/org/inbox.org" "/home/chris/org/notes.org" "/home/chris/org/repetition.org" "/home/chris/org/tasks.org" "/home/chris/org/tfc_plans.org" "/home/chris/org/ministry_team.org" "/home/chris/org/todo.org" "/home/chris/org/newsletter.org"))
-
 #+END_SRC
 
 ** Org Capture
 Here is our org capture templates
 #+BEGIN_SRC elisp
-(setq org-capture-templates
-      '(("t" "Personal todo" entry
-         (file+headline +org-capture-todo-file "Inbox")
-         "* TODO %^{TODO name}\n%a\n%i%?" :prepend t)
-        ("n" "Personal notes" entry
-         (file+headline +org-capture-notes-file "Inbox")
-         "* %u %?\n%i\n%a" :prepend t)
-        ("j" "Journal" entry
-         (file+olp+datetree +org-capture-journal-file)
-         "* %U %?\n%i\n%a" :prepend t)
-        ("p" "Templates for projects")
-        ("pt" "Project-local todo" entry
-         (file+headline +org-capture-project-todo-file "Inbox")
-         "* TODO %?\n%i\n%a" :prepend t)
-        ("pn" "Project-local notes" entry
-         (file+headline +org-capture-project-notes-file "Inbox")
-         "* %U %?\n%i\n%a" :prepend t)
-        ("pc" "Project-local changelog" entry
-         (file+headline +org-capture-project-changelog-file "Unreleased")
-         "* %U %?\n%i\n%a" :prepend t)
-        ("o" "Centralized templates for projects")
-        ("ot" "Project todo" entry #'+org-capture-central-project-todo-file
-         "* TODO %?\n %i\n %a" :heading "Tasks" :prepend nil)
-        ("on" "Project notes" entry #'+org-capture-central-project-notes-file
-         "* %U %?\n %i\n %a" :heading "Notes" :prepend t)
-        ("oc" "Project changelog" entry #'+org-capture-central-project-changelog-file
-         "* %U %?\n %i\n %a" :heading "Changelog" :prepend t)))
+(use-package! org
+  :config
+  (setq org-capture-templates
+        '(("t" "Personal todo" entry
+           (file+headline +org-capture-todo-file "Inbox")
+           "* TODO %^{TODO name}\n%a\n%i%?" :prepend t)
+          ("n" "Personal notes" entry
+           (file+headline +org-capture-notes-file "Inbox")
+           "* %u %?\n%i\n%a" :prepend t)
+          ("j" "Journal" entry
+           (file+olp+datetree +org-capture-journal-file)
+           "* %U %?\n%i\n%a" :prepend t)
+          ("p" "Templates for projects")
+          ("pt" "Project-local todo" entry
+           (file+headline +org-capture-project-todo-file "Inbox")
+           "* TODO %?\n%i\n%a" :prepend t)
+          ("pn" "Project-local notes" entry
+           (file+headline +org-capture-project-notes-file "Inbox")
+           "* %U %?\n%i\n%a" :prepend t)
+          ("pc" "Project-local changelog" entry
+           (file+headline +org-capture-project-changelog-file "Unreleased")
+           "* %U %?\n%i\n%a" :prepend t)
+          ("o" "Centralized templates for projects")
+          ("ot" "Project todo" entry #'+org-capture-central-project-todo-file
+           "* TODO %?\n %i\n %a" :heading "Tasks" :prepend nil)
+          ("on" "Project notes" entry #'+org-capture-central-project-notes-file
+           "* %U %?\n %i\n %a" :heading "Notes" :prepend t)
+          ("oc" "Project changelog" entry #'+org-capture-central-project-changelog-file
+           "* %U %?\n %i\n %a" :heading "Changelog" :prepend t))))
 #+END_SRC
 
 #+RESULTS:
-| t | Personal todo | entry | (file+headline +org-capture-todo-file Inbox) | * TODO %^{TODO name} |
+: t
 
 ** Org Super Agenda
 Here we need to setup how we want org super agenda to look
@@ -247,6 +286,8 @@ Basic Org-Roam setup. We select the directory and the basic width of the Org-Roa
 ;; Org-Roam
 (setq org-roam-directory "~/org")
 (setq org-roam-buffer-width 0.25)
+(map! :leader
+      :n "n r D" 'org-roam-db-build-cache)
 #+END_SRC
 
 Capture templates specific to Org-Roam which is particularly based around notes.
@@ -264,15 +305,17 @@ Capture templates specific to Org-Roam which is particularly based around notes.
 
 (setq org-roam-dailies-capture-templates
       '(("d" "daily" plain #'org-roam-capture--get-point ""
-        :immediate-finish t
-        :file-name "%<%m-%d-%Y>"
-        :head "#+TITLE: %<%m-%d-%Y>\n#+AUTHOR: Chris Cochrun mailto://chris@tfcconnection.org\n#+CREATED: %<%D - %I:%M %p>\n\n* HFL\n* Tasks\n* Family\n** How Do I Love Abbie?")
+         :immediate-finish t
+         :file-name "%<%m-%d-%Y>"
+         :head "#+TITLE: %<%m-%d-%Y>\n#+AUTHOR: Chris Cochrun\n#+CREATED: %<%D - %I:%M %p>\n\n* HFL\n* Tasks\n* Family\n** How Do I Love Abbie?")
         ("b" "biblical daily" plain #'org-roam-capture--get-point ""
          :immediate-finish t
-        :file-name "%<%m-%d-%Y>-bib"
-        :head "#+TITLE: %<%m-%d-%Y> - Biblical\n#+AUTHOR: Chris Cochrun mailto://chris@tfcconnection.org")))
-
+         :file-name "%<%m-%d-%Y>-bib"
+         :head "#+TITLE: %<%m-%d-%Y> - Biblical\n#+AUTHOR: Chris Cochrun")))
 #+END_SRC
+
+#+RESULTS:
+| d | daily | plain | #'org-roam-capture--get-point |   | :immediate-finish | t | :file-name | %<%m-%d-%Y> | :head | #+TITLE: %<%m-%d-%Y> |
 
 Org-Roam server. This let's me visualize my notes.
 #+BEGIN_SRC elisp
@@ -290,6 +333,38 @@ Org-Roam server. This let's me visualize my notes.
 
 (add-hook! org-roam-mode org-roam-server-mode t)
 #+END_SRC
+
+#+begin_src elisp
+(defun chris/+org-roam-capture-open-frame (&optional initial-input key)
+  "Opens the org-capture window in a floating frame that cleans itself up once
+you're done. This can be called from an external shell script."
+  (interactive)
+  (when (and initial-input (string-empty-p initial-input))
+    (setq initial-input nil))
+  (when (and key (string-empty-p key))
+    (setq key nil))
+  (let* ((frame-title-format "")
+         (frame (if (+org-capture-frame-p)
+                    (selected-frame)
+                  (make-frame +org-capture-frame-parameters))))
+    (select-frame-set-input-focus frame)  ; fix MacOS not focusing new frames
+    (with-selected-frame frame
+      (require 'org-capture)
+      (condition-case ex
+          (letf! ((#'pop-to-buffer #'switch-to-buffer))
+            (switch-to-buffer (doom-fallback-buffer))
+            (let ((org-capture-initial initial-input)
+                  org-capture-entry)
+              (when (and key (not (string-empty-p key)))
+                (setq org-capture-entry (org-capture-select-template key)))
+              (org-roam-capture)))
+        ('error
+         (message "org-capture: %s" (error-message-string ex))
+         (delete-frame frame))))))
+#+end_src
+
+#+RESULTS:
+: chris/+org-roam-capture-open-frame
 
 * Zen Mode
 #+BEGIN_SRC elisp :tangle no
@@ -350,8 +425,6 @@ Prompts for ENCLOSURE-INDEX when called interactively."
         :n "v" 'chris/elfeed-view-add-mpv
         :n "e" 'chris/elfeed-view-add-emms)
 #+END_SRC
-
-#+RESULTS:
 
 * EMMS
 #+BEGIN_SRC elisp
@@ -481,7 +554,7 @@ Let's make an emms hydra for typical controls and map them to the EMMS leader so
         (:maildir "/office/Junk Email"             :key ?j)
         (:maildir "/office/INBOX/Website Forms"    :key ?f)
         (:maildir "/gmail/INBOX"                   :key ?g)
-        (:maildir "/office/sent"                   :key ?s)))
+        (:maildir "/office/Sent Items"                   :key ?s)))
 
 (add-hook! 'mu4e-view-mode-hook evil-normal-state)
 
@@ -553,7 +626,7 @@ First thing is let's make sure org-mode can speak ledger, then we'll make sure d
 #+BEGIN_SRC elisp
 (use-package! calfw
   :config
-  (defun my-open-calendar ()
+  (defun chris/calfw-calendar-open ()
     (interactive)
     (cfw:open-calendar-buffer
      :contents-sources
@@ -565,7 +638,7 @@ First thing is let's make sure org-mode can speak ledger, then we'll make sure d
 
 (map! :leader
       (:prefix ("a" . "Calendar")
-       :desc "Open Calendar" "c" 'my-open-calendar))
+       :desc "Open Calendar" "c" 'chris/calfw-calendar-open))
 (map! :map cfw:calendar-mode-map
       "SPC" 'doom/leader
       "q" 'kill-this-buffer
@@ -646,13 +719,11 @@ First thing is let's make sure org-mode can speak ledger, then we'll make sure d
   (setq-default eshell-prompt-regexp "^ "))
 #+END_SRC
 
-#+RESULTS:
-: t
-
 ** Eshell Aliases
 #+BEGIN_SRC elisp
 (setq eshell-command-aliases-list
       '(("ls" "lsd $1")
+        ("la" "lsd -la $1")
         ("q" "exit")
         ("f" "find-file $1")
         ("ff" "find-file $1")
@@ -664,6 +735,20 @@ First thing is let's make sure org-mode can speak ledger, then we'll make sure d
         ("clear" "clear-scrollback")
         ("!!" "(eshell-previous-input)")))
 #+END_SRC
+
+#+RESULTS:
+| ls    | lsd $1                  |
+| la    | lsd -la $1              |
+| q     | exit                    |
+| f     | find-file $1            |
+| ff    | find-file $1            |
+| d     | dired $1                |
+| bd    | eshell-up $1            |
+| rg    | rg --color=always $*    |
+| ll    | ls -lah $*              |
+| gg    | magit-status            |
+| clear | clear-scrollback        |
+| !!    | (eshell-previous-input) |
 
 ** PATH
 * Matrix
@@ -687,7 +772,7 @@ Here are settings to make matrix-client.el work
 #+END_SRC
 
 #+RESULTS:
-: ((right-divider-width . 1) (bottom-divider-width . 1) (font . -*-VictorMono Nerd Font-semibold-*-*-*-*-120-*-*-*-*-*-*) (alpha 100 100) (buffer-predicate . doom-buffer-frame-predicate) (vertical-scroll-bars) (tool-bar-lines . 0) (menu-bar-lines . 0) (left-fringe . 4) (right-fringe . 4))
+: ((right-divider-width . 1) (bottom-divider-width . 1) (font . -*-VictorMono Nerd Font-semibold-*-*-*-*-120-*-*-*-*-*-*) (alpha 100 100) (vertical-scroll-bars) (tool-bar-lines . 0) (menu-bar-lines . 0) (buffer-predicate . doom-buffer-frame-predicate) (left-fringe . 4) (right-fringe . 4))
 
 QT/QML
 Ensure qml is added to the completion engine company
@@ -748,6 +833,9 @@ Ensure qml is added to the completion engine company
 ;; (setq +ivy-buffer-preview t)
 #+END_SRC
 
+#+RESULTS:
+: counsel-find-file
+
 ** HELM
 #+BEGIN_SRC elisp :tangle no
 ;; Helm
@@ -797,6 +885,9 @@ Here we are defining a window moving hydra that helps us to grow, shrink switch 
       :prefix "w"
       :desc "Window Hydra" "a" '+hydra/window-move/body)
 #+END_SRC
+
+#+RESULTS:
+: +hydra/window-move/body
 
 * EXWM
 :PROPERTIES:
