@@ -387,7 +387,7 @@ Prompts for ENCLOSURE-INDEX when called interactively."
         (:name "Today's messages" :query "date:today..now" :key 116)
         (:name "Last 7 days" :query "date:7d..now" :hide-unread t :key 119)
         (:name "Messages with images" :query "mime:image/*" :key 112))
-      mu4e-attachment-dir "/home/chris/storage/Nextcloud/attachments")
+      mu4e-attachment-dir "/home/chris/Nextcloud/attachments")
 
 (mu4e-alert-set-default-style 'notifications)
 (add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
@@ -507,6 +507,8 @@ Prompts for ENCLOSURE-INDEX when called interactively."
         ("clear" "clear-scrollback")
         ("!c" "eshell-previous-input 2")))
 
+
+
 ;; Set Vterm to zsh
 (setq vterm-shell "/bin/fish")
 
@@ -613,3 +615,18 @@ Prompts for ENCLOSURE-INDEX when called interactively."
       transmission-refresh-modes '(transmission-mode transmission-files-mode transmission-info-mode transmission-peers-mode))
 
 (setq package-native-compile t)
+
+(setq pdf-misc-print-programm "/usr/bin/lpr")
+(setq pdf-misc-print-programm-args (quote ("-o media=Letter" "-o sides=two-sided-long-edge")))
+
+(defun chris/pdf-misc-print-document (filename &optional interactive-p)
+  (interactive
+   (list (pdf-view-buffer-file-name) t))
+  (cl-check-type filename (and string file-readable))
+  (let ((program (pdf-misc-print-programm interactive-p))
+        (args (append pdf-misc-print-programm-args (list filename))))
+    (unless program
+      (error "No print program available"))
+    (apply #'start-process "printing" nil program args)
+    (message "Print job started: %s %s"
+             program (mapconcat #'identity args " "))))

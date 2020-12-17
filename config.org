@@ -564,8 +564,11 @@ Let's make an emms hydra for typical controls and map them to the EMMS leader so
         (:name "Today's messages" :query "date:today..now" :key 116)
         (:name "Last 7 days" :query "date:7d..now" :hide-unread t :key 119)
         (:name "Messages with images" :query "mime:image/*" :key 112))
-      mu4e-attachment-dir "/home/chris/storage/Nextcloud/attachments")
+      mu4e-attachment-dir "/home/chris/Nextcloud/attachments")
 #+END_SRC
+
+#+RESULTS:
+: /home/chris/Nextcloud/attachments
 
 Let's setup some notifications for Mu4e and then set the update interval to every 10 minutes.
 #+BEGIN_SRC elisp
@@ -749,7 +752,11 @@ Let's make sure autolist works well like tcsh
 | !c    | eshell-previous-input 2 |
 
 ** PATH
+* Matrix
+Here are settings to make matrix-client.el work
+#+begin_src elisp
 
+#+end_src
 * Misc
 #+BEGIN_SRC elisp
 ;; Set Vterm to zsh
@@ -784,6 +791,23 @@ Ensure qml is added to the completion engine company
 
 #+RESULTS:
 : 0.1
+** Printing
+#+begin_src emacs-lisp
+(setq pdf-misc-print-programm "/usr/bin/lpr")
+(setq pdf-misc-print-programm-args (quote ("-o media=Letter" "-o sides=two-sided-long-edge")))
+
+(defun chris/pdf-misc-print-document (filename &optional interactive-p)
+  (interactive
+   (list (pdf-view-buffer-file-name) t))
+  (cl-check-type filename (and string file-readable))
+  (let ((program (pdf-misc-print-programm interactive-p))
+        (args (append pdf-misc-print-programm-args (list filename))))
+    (unless program
+      (error "No print program available"))
+    (apply #'start-process "printing" nil program args)
+    (message "Print job started: %s %s"
+             program (mapconcat #'identity args " "))))
+#+end_src
 
 * Completion
 ** SELECTRUM
