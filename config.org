@@ -222,9 +222,6 @@ Here is our org capture templates
            "* %U %?\n %i\n %a" :heading "Changelog" :prepend t))))
 #+END_SRC
 
-#+RESULTS:
-: t
-
 ** Org Super Agenda
 Here we need to setup how we want org super agenda to look
 #+BEGIN_SRC elisp
@@ -716,6 +713,10 @@ First thing is let's make sure org-mode can speak ledger, then we'll make sure d
   (setq-default eshell-prompt-regexp "^ "))
 #+END_SRC
 
+Let's make sure autolist works well like tcsh
+#+begin_src elisp
+(setq eshell-cmpl-autolist t)
+#+end_src
 ** Eshell Aliases
 #+BEGIN_SRC elisp
 (setq eshell-command-aliases-list
@@ -730,7 +731,7 @@ First thing is let's make sure org-mode can speak ledger, then we'll make sure d
         ("ll" "ls -lah $*")
         ("gg" "magit-status")
         ("clear" "clear-scrollback")
-        ("!!" "(eshell-previous-input)")))
+        ("!c" "eshell-previous-input 2")))
 #+END_SRC
 
 #+RESULTS:
@@ -745,7 +746,7 @@ First thing is let's make sure org-mode can speak ledger, then we'll make sure d
 | ll    | ls -lah $*              |
 | gg    | magit-status            |
 | clear | clear-scrollback        |
-| !!    | (eshell-previous-input) |
+| !c    | eshell-previous-input 2 |
 
 ** PATH
 
@@ -1101,3 +1102,5 @@ Using transmission.el is much more helpful for interacting with my torrents on m
 
 #+RESULTS:
 | transmission-mode | transmission-files-mode | transmission-info-mode | transmission-peers-mode |
+
+

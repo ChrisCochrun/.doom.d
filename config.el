@@ -491,6 +491,8 @@ Prompts for ENCLOSURE-INDEX when called interactively."
   ;;; last line only.
   (setq-default eshell-prompt-regexp "^ "))
 
+(setq eshell-cmpl-autolist t)
+
 (setq eshell-command-aliases-list
       '(("ls" "lsd $1")
         ("la" "lsd -la $1")
@@ -503,7 +505,7 @@ Prompts for ENCLOSURE-INDEX when called interactively."
         ("ll" "ls -lah $*")
         ("gg" "magit-status")
         ("clear" "clear-scrollback")
-        ("!!" "(eshell-previous-input)")))
+        ("!c" "eshell-previous-input 2")))
 
 ;; Set Vterm to zsh
 (setq vterm-shell "/bin/fish")
