@@ -81,40 +81,42 @@
 (setq +doom-dashboard-banner-file "whitelionsmall.png")
 
 ;; org
-(setq org-superstar-headline-bullets-list '("◉" "◈" "▸" "◎" "✬" "◇" "❉" "✙" "❖"))
-(setq olivetti-body-width 0.6)
-(setq olivetti-minimum-body-width 100)
-(setq org-imenu-depth 3)
-(setq org-odt-styles-file "/home/chris/org/style.odt")
-(add-hook! org-mode (setq hl-line-mode nil))
+(use-package! org
+  :config
+  (setq org-superstar-headline-bullets-list '("◉" "◈" "▸" "◎" "✬" "◇" "❉" "✙" "❖"))
+  (setq olivetti-body-width 0.6)
+  (setq olivetti-minimum-body-width 100)
+  (setq org-imenu-depth 3)
+  (setq org-odt-styles-file "/home/chris/org/style.odt")
+  (add-hook! org-mode (setq hl-line-mode nil))
 
-(add-hook! 'org-mode-hook (lambda () (imenu-add-to-menubar "Imenu")))
+  (add-hook! 'org-mode-hook (lambda () (imenu-add-to-menubar "Imenu")))
 
-(setq org-todo-keywords
-      '((sequence "TODO(t)" "PROJ(p)" "STRT(s)" "WAIT(w)" "HOLD(h)" "|" "DONE(d)" "CNCL(c)")
-        (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
+  (setq org-todo-keywords
+        '((sequence "TODO(t)" "PROJ(p)" "STRT(s)" "WAIT(w)" "HOLD(h)" "|" "DONE(d)" "CNCL(c)")
+          (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
 
 
-;; (add-hook! org-mode (olivetti-mode t))
-;; (add-hook! org-mode (org-autolist-mode t))
-(add-hook! org-mode (toc-org-mode t))
+  ;; (add-hook! org-mode (olivetti-mode t))
+  ;; (add-hook! org-mode (org-autolist-mode t))
+  (add-hook! org-mode (toc-org-mode t))
 
-(map! :map org-mode-map
-      :n "M-<tab>" 'org-show-subtree
-      :n "C-M-o" 'turn-on-olivetti-mode)
+  (map! :map org-mode-map
+        :n "M-<tab>" 'org-show-subtree
+        :n "C-M-o" 'turn-on-olivetti-mode)
 
-;; (defun org-yt-follow-mpv (video-id)
-;;   "Open youtube with VIDEO-ID."
-;;   (async-shell-command (format "mpv %s" (concat "https://youtu.be/" video-id)))
-;;   )
+  ;; (defun org-yt-follow-mpv (video-id)
+  ;;   "Open youtube with VIDEO-ID."
+  ;;   (async-shell-command (format "mpv %s" (concat "https://youtu.be/" video-id)))
+  ;;   )
 
-;; (map! :map org-mode-map
-;;       :n "M-v" 'org-yt-follow-mpv)
+  ;; (map! :map org-mode-map
+  ;;       :n "M-v" 'org-yt-follow-mpv)
 
-(setq deft-directory "~/org/")
+  (setq deft-directory "~/org/")
 
-(setq org-agenda-files
-      '("/home/chris/org/DMPREADME.org" "/home/chris/org/DMPTODO.org" "/home/chris/org/inbox.org" "/home/chris/org/notes.org" "/home/chris/org/repetition.org" "/home/chris/org/tasks.org" "/home/chris/org/tfc_plans.org" "/home/chris/org/ministry_team.org" "/home/chris/org/todo.org" "/home/chris/org/newsletter.org"))
+  (setq org-agenda-files
+        '("/home/chris/org/DMPREADME.org" "/home/chris/org/DMPTODO.org" "/home/chris/org/inbox.org" "/home/chris/org/notes.org" "/home/chris/org/repetition.org" "/home/chris/org/tasks.org" "/home/chris/org/tfc_plans.org" "/home/chris/org/ministry_team.org" "/home/chris/org/todo.org" "/home/chris/org/newsletter.org")))
 
 (use-package! org
   :config
@@ -177,30 +179,33 @@
   (org-wild-notifier-notification-title "Org Reminder"))
 
 ;; Org-Roam
-(setq org-roam-directory "~/org")
-(setq org-roam-buffer-width 0.25)
-(map! :leader
-      :n "n r D" 'org-roam-db-build-cache)
 
-(setq org-roam-capture-templates
-      '(("d" "default" plain (function org-roam--capture-get-point)
-         "%?"
-         :file-name "${slug}"
-         :head "#+TITLE: ${title}\n#+AUTHOR: Chris Cochrun\n#+CREATED: %<%D - %I:%M %p>\n\n* ")
-        ("b" "bible" plain (function org-roam--capture-get-point)
-         "%?"
-         :file-name "${slug}"
-         :head "#+TITLE: ${title}\n#+AUTHOR: Chris Cochrun\n#+CREATED: %<%D - %I:%M %p>\n- tags %^G\n\n* ")))
+(use-package! org-roam
+  :config
+  (setq org-roam-directory "~/org")
+  (setq org-roam-buffer-width 0.25)
+  (setq org-roam-file-exclude-regexp ".*stversion.*\|.*\.sync-conflict.*\|.*~.*")
+  (setq org-roam-capture-templates
+        '(("d" "default" plain (function org-roam--capture-get-point)
+           "%?"
+           :file-name "${slug}"
+           :head "#+TITLE: ${title}\n#+AUTHOR: Chris Cochrun\n#+CREATED: %<%D - %I:%M %p>\n\n* ")
+          ("b" "bible" plain (function org-roam--capture-get-point)
+           "%?"
+           :file-name "${slug}"
+           :head "#+TITLE: ${title}\n#+AUTHOR: Chris Cochrun\n#+CREATED: %<%D - %I:%M %p>\n- tags %^G\n\n* ")))
 
-(setq org-roam-dailies-capture-templates
-      '(("d" "daily" plain #'org-roam-capture--get-point ""
-         :immediate-finish t
-         :file-name "%<%m-%d-%Y>"
-         :head "#+TITLE: %<%m-%d-%Y>\n#+AUTHOR: Chris Cochrun\n#+CREATED: %<%D - %I:%M %p>\n\n* HFL\n* Tasks\n* Family\n** How Do I Love Abbie?")
-        ("b" "biblical daily" plain #'org-roam-capture--get-point ""
-         :immediate-finish t
-         :file-name "%<%m-%d-%Y>-bib"
-         :head "#+TITLE: %<%m-%d-%Y> - Biblical\n#+AUTHOR: Chris Cochrun")))
+  (setq org-roam-dailies-capture-templates
+        '(("d" "daily" plain #'org-roam-capture--get-point ""
+           :immediate-finish t
+           :file-name "%<%m-%d-%Y>"
+           :head "#+TITLE: %<%m-%d-%Y>\n#+AUTHOR: Chris Cochrun\n#+CREATED: %<%D - %I:%M %p>\n\n* HFL\n* Tasks\n* Family\n** How Do I Love Abbie?")
+          ("b" "biblical daily" plain #'org-roam-capture--get-point ""
+           :immediate-finish t
+           :file-name "%<%m-%d-%Y>-bib"
+           :head "#+TITLE: %<%m-%d-%Y> - Biblical\n#+AUTHOR: Chris Cochrun")))
+  (map! :leader
+        :n "n r D" 'org-roam-db-build-cache))
 
 (use-package! org-roam-server
   :config
@@ -244,50 +249,98 @@ you're done. This can be called from an external shell script."
          (delete-frame frame))))))
 
 (map! :leader "o F" 'elfeed)
-(add-hook! 'elfeed-search-mode-hook 'elfeed-update)
+(add-hook! 'elfeed-search-mode-hook 'elfeed-update 'org-roam-buffer-deactivate)
 
-;; function to launch mpv from elfeed
-(defun elfeed-v-mpv (url)
-  "Watch a video from URL in MPV"
-  (emms-add-url url))
+(defvar chris/elfeed-bongo-playlist "*Bongo-Elfeed Queue*"
+  "Name of the Elfeed+Bongo multimedia playlist.")
 
-(defun chris/elfeed-view-add-mpv (&optional use-generic-p)
-  "Youtube-feed link"
-  (interactive "P")
-  (let ((entries (elfeed-search-selected)))
-    (cl-loop for entry in entries
-             do (elfeed-untag entry 'unread)
-             when (elfeed-entry-link entry)
-             do (elfeed-v-mpv it))
-    (mapc #'elfeed-search-update-entry entries)
-    (unless (use-region-p) (forward-line))))
+(defun chris/elfeed-bongo-insert-item ()
+  "Insert `elfeed' multimedia links in `bongo' playlist buffer.
 
-;; (defun chris/elfeed-view-add-emms (&optional use-generic-p)
-;;   "Youtube-feed link"
-;;   (interactive "P")
-;;   (let ((entries (elfeed-search-selected)))
-;;     (cl-loop for entry in entries
-;;              do (elfeed-untag entry 'unread)
-;;              do (emms-add-url (car (elt (elfeed-entry-enclosures entry)
-;;                                         (- enclosure-index 1))))
-;;              )
-;;     (mapc #'elfeed-search-update-entry entries)
-;;     (unless (use-region-p) (forward-line)))
+The playlist buffer has a unique name so that it will never
+interfere with the default `bongo-playlist-buffer'."
+  (interactive)
+  (with-eval-after-load 'bongo
+    (let* ((entry (if (eq major-mode 'elfeed-show-mode)
+                      elfeed-show-entry
+                    (elfeed-search-selected :ignore-region)))
+           (link (elfeed-entry-link entry))
+           (enclosure (elt (car (elfeed-entry-enclosures entry)) 0))
+           (url (if (string-prefix-p "https://thumbnails" enclosure)
+                    (or link enclosure)
+                  (or enclosure link)))
+           (title (elfeed-entry-title entry))
+           (bongo-pl chris/elfeed-bongo-playlist)
+           (buffer (get-buffer-create bongo-pl)))
+      (message "link is %s" link)
+      (elfeed-search-untag-all-unread)
+      (unless (bongo-playlist-buffer)
+        (bongo-playlist-buffer))
+      (display-buffer buffer)
+      (with-current-buffer buffer
+        (when (not (bongo-playlist-buffer-p))
+          (bongo-playlist-mode)
+          (setq-local bongo-library-buffer (get-buffer "*elfeed-search*"))
+          (setq-local bongo-enabled-backends '(mpv))
+          (bongo-progressive-playback-mode))
+        (goto-char (point-max))
+        (bongo-insert-uri url title)
+        (bongo-insert-comment-text (format "     ==> %s\n" url))
+        (let ((inhibit-read-only t))
+          (delete-duplicate-lines (point-min) (point-max)))
+        (bongo-recenter))
+      (message "Enqueued %s “%rx 580 vs gtx 1080rx 580 vs gtx 1080rx 580 vs gtx 1080rx 580 vs gtx 1080s” in %s"
+               (if enclosure "podcast" "video")
+               (propertize title 'face 'italic)
+               (propertize bongo-pl 'face 'bold)))))
 
-(defun elfeed-show-add-enclosure-to-playlist (enclosure-index)
-  "Add enclosure number ENCLOSURE-INDEX to current EMMS playlist.
-Prompts for ENCLOSURE-INDEX when called interactively."
+(defun chris/elfeed-bongo-switch-to-playlist ()
+  (interactive)
+  (let* ((bongo-pl chris/elfeed-bongo-playlist)
+         (buffer (get-buffer bongo-pl)))
+    (if buffer
+        (switch-to-buffer buffer)
+      (message "No `bongo' playlist is associated with `elfeed'."))))
 
-  (interactive (list (elfeed--enclosure-maybe-prompt-index elfeed-show-entry)))
-  (require 'emms) ;; optional
-  (with-no-warnings ;; due to lazy (require )
-    (emms-add-url   (car (elt (elfeed-entry-enclosures elfeed-show-entry)
-                              (- enclosure-index 1))))))
+;; mapping keys to launch mpv
+(map! :map elfeed-search-mode-map
+      :n "v" 'chris/elfeed-bongo-insert-item
+      :n "h" 'chris/elfeed-bongo-switch-to-playlist)
 
-  ;; mapping keys to launch mpv
-  (map! :map elfeed-search-mode-map
-        :n "v" 'chris/elfeed-view-add-mpv
-        :n "e" 'chris/elfeed-view-add-emms)
+(use-package! bongo
+  :config
+  (define-bongo-backend mpv
+    ;; :constructor 'bongo-start-mpv-player
+    :program-name 'mpv
+    :constructor 'bongo-start-mpv-player
+    :extra-program-arguments '("--input-ipc-server=/tmp/mpvsocket")
+    :matcher '((local-file "file:" "http:" "ftp:" "lbry:")
+               "ogg" "flac" "mp3" "mka" "wav" "wma"
+               "mpg" "mpeg" "vob" "avi" "ogm" "mp4" "mkv"
+               "mov" "asf" "wmv" "rm" "rmvb" "ts")
+    :matcher '(("mms:" "mmst:" "rtp:" "rtsp:" "udp:" "unsv:"
+                "dvd:" "vcd:" "tv:" "dvb:" "mf:" "cdda:" "cddb:"
+                "cue:" "sdp:" "mpst:" "tivo:") . t)
+    :matcher '(("http:" "https:" "lbry:") . t))
+
+  (setq bongo-enabled-backends '(mpv))
+
+  (defun chris/bongo-mark-line-forward ()
+    (interactive)
+    (bongo-mark-line)
+    (goto-char (bongo-point-after-object))
+    (goto-char (bongo-point-after-object)))
+
+  (defun chris/bongo-mpv-pause/resume ()
+    (interactive)
+    (bongo-mpv-player-pause/resume bongo-player))
+
+  (map! :map bongo-playlist-mode-map
+        :n "RET" 'bongo-dwim
+        :n "d" 'bongo-kill
+        :n "u" 'bongo-unmark-region
+        :n "p" 'bongo-pause/resume
+        :n "m" 'chris/bongo-mark-line-forward))
 
 (map! :leader "o M" 'emms)
 (require 'emms-setup)
@@ -492,6 +545,8 @@ Prompts for ENCLOSURE-INDEX when called interactively."
   ;;; last line only.
   (setq-default eshell-prompt-regexp "^ "))
 
+(setq eshell-cmpl-autolist t)
+
 (setq eshell-command-aliases-list
       '(("ls" "lsd $1")
         ("la" "lsd -la $1")
@@ -504,7 +559,7 @@ Prompts for ENCLOSURE-INDEX when called interactively."
         ("ll" "ls -lah $*")
         ("gg" "magit-status")
         ("clear" "clear-scrollback")
-        ("!!" "(eshell-previous-input)")))
+        ("!c" "eshell-previous-input 2")))
 
 
 
@@ -517,8 +572,8 @@ Prompts for ENCLOSURE-INDEX when called interactively."
 
 
 ;; Make Emacs transparent
-(set-frame-parameter (selected-frame) 'alpha '(100 100))
-(add-to-list 'default-frame-alist '(alpha 100 100))
+(set-frame-parameter (selected-frame) 'alpha nil)
+(add-to-list 'default-frame-alist '(alpha nil))
 
 (add-to-list 'company-backends 'company-qml)
 
@@ -609,7 +664,7 @@ Prompts for ENCLOSURE-INDEX when called interactively."
 (setq tramp-terminal-type "dumb")
 
 (map! :leader "o T" 'transmission)
-(setq transmission-host "192.168.1.35"
+(setq transmission-host "192.168.1.7"
       transmission-rpc-path "/transmission/rpc"
       transmission-refresh-modes '(transmission-mode transmission-files-mode transmission-info-mode transmission-peers-mode))
 
