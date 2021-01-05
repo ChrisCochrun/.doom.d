@@ -15,7 +15,7 @@
 ;; (setq doom-font (font-spec :family "monospace" :size 12 :weight 'semi-light)
 ;;       doom-variable-pitch-font (font-spec :family "sans" :size 13))
 
-(setq doom-font (font-spec :family "VictorMono Nerd Font" :size 12.0 :weight 'semi-bold)
+(setq doom-font (font-spec :family "VictorMono Nerd Font Mono" :size 12.0 :weight 'semi-bold)
       doom-variable-pitch-font (font-spec :family "NotoSans Display Nerd Font" :size 13.0 :weight 'light))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
@@ -294,12 +294,13 @@ Prompts for ENCLOSURE-INDEX when called interactively."
 (emms-all)
 (emms-default-players)
 (setq emms-volume-change-function 'emms-volume-pulse-change)
+(add-to-list 'emms-player-list 'emms-player-mpd)
 
 (map! :leader
       (:prefix ("e" . "EMMS")
        :desc "Pause" "p" 'emms-pause))
 
-(defhydra +hydra/emms-controls (:hint nil)
+(defhydra chris/hydra/emms-controls (:hint nil)
   "
    audio: _j_:lower     _k_:raise
     seek: _h_:backward  _l_:forward  _H_:back 30sec
@@ -318,13 +319,13 @@ Prompts for ENCLOSURE-INDEX when called interactively."
   ("q" nil))
 
 (map! :leader
-      :desc "EMMS Controls" "e a" '+hydra/emms-controls/body
-      :desc "Seek Back Hydra" "e h" '+hydra/emms-cotrols/emms-seek-backward
-      :desc "Seek Back 30s Hydra" "e H" '+hydra/emms-cotrols/chris/emms-seek-backward
-      :desc "Seek Forward Hydra" "e l" '+hydra/emms-cotrols/emms-seek-forward
-      :desc "Volume Down Hydra" "e j" '+hydra/emms-cotrols/emms-volume-lower
-      :desc "Volume Up Hydra" "e k" '+hydra/emms-cotrols/emms-volume-raise
-      :desc "Pause Hydra" "e P" '+hydra/emms-cotrols/emms-pause)
+      :desc "EMMS Controls" "e a" 'chris/hydra/emms-controls/body
+      :desc "Seek Back Hydra" "e h" 'chris/hydra/emms-cotrols/emms-seek-backward
+      :desc "Seek Back 30s Hydra" "e H" 'chris/hydra/emms-cotrols/chris/emms-seek-backward
+      :desc "Seek Forward Hydra" "e l" 'chris/hydra/emms-cotrols/emms-seek-forward
+      :desc "Volume Down Hydra" "e j" 'chris/hydra/emms-cotrols/emms-volume-lower
+      :desc "Volume Up Hydra" "e k" 'chris/hydra/emms-cotrols/emms-volume-raise
+      :desc "Pause Hydra" "e P" 'chris/hydra/emms-cotrols/emms-pause)
 
 ;; Add gmail
 (set-email-account! "gmail"
