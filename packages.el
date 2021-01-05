@@ -57,6 +57,8 @@
 (package! org-autolist)
 (package! org-wild-notifier)
 (package! emms)
+(package! mpv)
+(package! bongo)
 (package! nov)
 ;; (package! mu4e-views)
 (package! gdscript-mode
