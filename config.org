@@ -879,8 +879,8 @@ Here are settings to make matrix-client.el work
 
 
 ;; Make Emacs transparent
-(set-frame-parameter (selected-frame) 'alpha nil)
-(add-to-list 'default-frame-alist '(alpha nil))
+(set-frame-parameter (selected-frame) 'alpha '(80 . 80))
+(add-to-list 'default-frame-alist '(alpha '(80 . 80)))
 #+END_SRC
 
 #+RESULTS:
@@ -1006,7 +1006,7 @@ Here we are defining a window moving hydra that helps us to grow, shrink switch 
 
 * EXWM
 :PROPERTIES:
-:header-args: :tangle no
+:header-args: :tangle yes
 :END:
 
 Through the power of Org-Mode we can turn this off and on depending on if the next time Emacs is launched I want it to be my window manager.
@@ -1027,6 +1027,7 @@ Also, we need a way to display the time and battery.
 
 #+RESULTS:
 : t
+
 
 #+BEGIN_SRC elisp
 (require 'exwm)
@@ -1131,6 +1132,7 @@ Also, we need a way to display the time and battery.
                      (interactive (list (read-shell-command "$ ")))
                      (start-process-shell-command command nil command)))
         ([menu] . counsel-linux-app)
+        ([s-space] . +eshell/toggle)
         ;; 's-N': Switch to certain workspace.
         ,@(mapcar (lambda (i)
                     `(,(kbd (format "s-%d" i)) .

@@ -52,7 +52,6 @@
 (package! company-qml)
 (package! org-roam-server)
 (package! org-super-agenda)
-(package! exwm)
 (package! olivetti)
 (package! org-autolist)
 (package! org-wild-notifier)
@@ -75,9 +74,11 @@
   :recipe (:host github :repo "shtwzrd/friar" :branch "master"
            :files (:defaults "*.lua" "*.fnl")))
 
-(package! matrix-client
-  :recipe (:host github :repo "alphapapa/matrix-client.el"
-                         :files (:defaults "logo.png" "matrix-client-standalone.el.sh")))
+(package! xelb :recipe (:no-byte-compile t :no-native-compile t))
+(package! exwm :recipe (:no-byte-compile t :no-native-compile t))
+;; (package! matrix-client
+;;   :recipe (:host github :repo "alphapapa/matrix-client.el"
+;;                          :files (:defaults "logo.png" "matrix-client-standalone.el.sh")))
 
 ;; (package! helm :disable t)
 ;; (package! helm-easymenu :disable t)

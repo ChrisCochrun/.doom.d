@@ -631,6 +631,148 @@ interfere with the default `bongo-playlist-buffer'."
       :prefix "w"
       :desc "Window Hydra" "a" '+hydra/window-move/body)
 
+(set-frame-parameter nil 'fullscreen 'fullboth)
+
+(display-time-mode t)
+(setq display-time-interval 60)
+(setq display-time-format "%a %b %e, %l:%M %p")
+(display-battery-mode)
+
+(require 'exwm)
+(require 'exwm-config)
+(exwm-config-example)
+(exwm-enable)
+
+(require 'exwm-randr)
+(setq exwm-randr-workspace-monitor-plist '(0 "DVI-D-0" 1 "HDMI-0"))
+(add-hook! 'exwm-randr-screen-change-hook
+  (lambda ()
+    (start-process-shell-command
+     "xrandr" nil "xrandr --output DVI-D-0 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output HDMI-0 --mode 1600x900 --pos 1920x0 --rotate normal")))
+(exwm-randr-enable)
+
+(require 'exwm-systemtray)
+(exwm-systemtray-enable)
+(if (string= system-name "chris-linuxlaptop")
+    (setq exwm-systemtray-height 38
+          exwm-systemtray-icon-gap 12)
+  (setq exwm-systemtray-height 18
+        exwm-systemtray-icon-gap 6))
+
+(setq exwm-workspace-number 8
+      exwm-workspace-show-all-buffers t)
+
+;; Rename buffer to window title
+(defun chris/exwm-rename-buffer-to-title ()
+  (exwm-workspace-rename-buffer exwm-title))
+(add-hook! 'exwm-update-title-hook 'chris/exwm-rename-buffer-to-title)
+
+(defun chris/exwm-workspace-next ()
+  "Move forward one workspace."
+  (interactive)
+  (if (< exwm-workspace-current-index (1- exwm-workspace-number))
+      (exwm-workspace-switch (1+ exwm-workspace-current-index))
+    (message "No next workspace.")))
+
+(defun chris/exwm-workspace-prev ()
+  "Move to the previous workspace."
+  (interactive)
+  (if (> exwm-workspace-current-index 0)
+      (exwm-workspace-switch (1- exwm-workspace-current-index))
+    (message "No previous workspace.")))
+
+(defun chris/exwm-flameshot ()
+  "Take a screenshot using flameshot"
+  (interactive)
+  (start-process-shell-command "flameshot" nil "flameshot gui"))
+
+(defun chris/exwm-launch-dolphin ()
+  "launch dolphin"
+  (interactive)
+  (start-process-shell-command "dolphin" nil "dolphin"))
+
+;; microphone commands
+(if (string= system-name "archdesktop")
+    (setq desktop-environment-volume-toggle-microphone-command
+          "amixer -c 2 set Mic toggle | rg off && printf 'Microphone muted' || printf 'Microphone unmuted'"))
+
+(setq desktop-environment-volume-toggle-command
+      "amixer set Master toggle | rg off && printf 'Volume muted' || printf 'Volume unmuted'")
+
+;; make all floating windows without mode line
+(add-hook 'exwm-floating-setup-hook 'exwm-layout-hide-mode-line)
+(add-hook 'exwm-floating-exit-hook 'exwm-layout-show-mode-line)
+
+;;Global keybindings
+(setq exwm-input-global-keys
+      `(
+        ;; 's-r': Reset (to line-mode).
+        ([?\s-r] . exwm-reset)
+        ;; 's-i': Toggle from line to char modes
+        ([?\s-i] . exwm-input-toggle-keyboard)
+        ;; 's-w': Switch workspace.
+        ([?\s-w] . +hydra/window-move/body)
+        ([?\s-k] . evil-window-prev)
+        ([?\s-j] . evil-window-next)
+        ([?\s-h] . chris/exwm-workspace-prev)
+        ([?\s-l] . chris/exwm-workspace-next)
+        ;; Switch Buffer
+        ([?\s-b] . exwm-workspace-switch-to-buffer)
+        ([?\s-m] . exwm-workspace-move-window)
+        ;; close app
+        ([?\s-c] . kill-this-buffer)
+        ;; Launch Dolphin
+        ([?\s-d] . chris/exwm-launch-dolphin)
+        ;; Launch eshell
+        ([s-return] . +eshell/toggle)
+        ;; screenshot
+        ([print] . chris/exwm-flameshot)
+        ;; Audio
+        ([XF86AudioRaiseVolume] . desktop-environment-volume-increment)
+        ([XF86AudioLowerVolume] . desktop-environment-volume-decrement)
+        ([XF86AudioMute] . desktop-environment-toggle-mute)
+        ([XF86Launch8] . desktop-environment-toggle-microphone-mute)
+        ;; Brightness
+        ([XF86MonBrightnessUp] . desktop-environment-brightness-increment)
+        ([XF86MonBrightnessDown] . desktop-environment-brightness-decrement)
+        ;; 's-&': Launch application.
+        ([?\s-r] . (lambda (command)
+                     (interactive (list (read-shell-command "$ ")))
+                     (start-process-shell-command command nil command)))
+        ([menu] . counsel-linux-app)
+        ;; 's-N': Switch to certain workspace.
+        ,@(mapcar (lambda (i)
+                    `(,(kbd (format "s-%d" i)) .
+                      (lambda ()
+                        (interactive)
+                        (exwm-workspace-switch-create ,i))))
+                  (number-sequence 0 9))))
+
+(setq exwm-floating-border-width 0)
+(setq exwm-manage-configurations '(((or (string-match-p "libreoffice"
+                                                        exwm-class-name)
+                                        (string= exwm-class-name "MuseScore3")
+                                        (string= exwm-class-name "Gimp")
+                                        (string= exwm-class-name "feh")
+                                        (string= exwm-class-name "dolphin")
+                                        (string= exwm-title "Event Tester"))
+                                    floating t
+                                    floating-mode-line nil)))
+
+(setq exwm-input-simulation-keys
+      '(
+        ([j] . [down])
+        ([gg] . [home])
+        ([S-g] . [end])))
+
+(start-process-shell-command "xset" nil "xset r rate 220 90")
+(start-process-shell-command "fehwall" nil "feh --bg-fill ~/Pictures/wallpapers/RoyalKing.png")
+(start-process-shell-command "picom" nil "picom")
+(start-process-shell-command "flameshot" nil "flameshot")
+(start-process-shell-command "nextcloud" nil "nextcloud")
+(start-process-shell-command "caffeine" nil "caffeine")
+(start-process-shell-command "kdeconnect-indicator" nil "kdeconnect-indicator")
+
 (use-package! ivy-posframe
     :config
   (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
