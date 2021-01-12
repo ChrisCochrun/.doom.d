@@ -198,12 +198,12 @@
   (setq org-roam-dailies-capture-templates
         '(("d" "daily" plain #'org-roam-capture--get-point ""
            :immediate-finish t
-           :file-name "%<%m-%d-%Y>"
-           :head "#+TITLE: %<%m-%d-%Y>\n#+AUTHOR: Chris Cochrun\n#+CREATED: %<%D - %I:%M %p>\n\n* HFL\n* Tasks\n* Family\n** How Do I Love Abbie?")
+           :file-name "%<%Y-%m-%d>"
+           :head "#+TITLE: %<%Y-%m-%d>\n#+AUTHOR: Chris Cochrun\n#+CREATED: %<%D - %I:%M %p>\n\n* HFL\n* Tasks\n* Family\n** How Do I Love Abbie?")
           ("b" "biblical daily" plain #'org-roam-capture--get-point ""
            :immediate-finish t
-           :file-name "%<%m-%d-%Y>-bib"
-           :head "#+TITLE: %<%m-%d-%Y> - Biblical\n#+AUTHOR: Chris Cochrun")))
+           :file-name "%<%Y-%m-%d>-bib"
+           :head "#+TITLE: %<%Y-%m-%d> - Biblical\n#+AUTHOR: Chris Cochrun")))
   (map! :leader
         :n "n r D" 'org-roam-db-build-cache))
 
@@ -447,14 +447,11 @@ interfere with the default `bongo-playlist-buffer'."
 (add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
 (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display)
 (setq mu4e-alert-email-notification-types '(count))
-(setq mu4e-update-interval 600)
+(setq mu4e-update-interval 180)
 
 (setq mu4e-alert-interesting-mail-query
       (concat
-       "flag:unread"
-       " AND NOT flag:trashed"
-       " AND NOT maildir:"
-       "\"/outlook/Junk\" AND NOT maildir:\"/office/Junk Email\" AND NOT maildir:\"/outlook/Deleted\" AND NOT maildir:\"/office/Deleted Items\""))
+       "flag:unread AND NOT flag:trashed AND NOT maildir:\"/outlook/Junk\" AND NOT maildir:\"/office/Junk Email\" AND NOT maildir:\"/outlook/Deleted\" AND NOT maildir:\"/office/Deleted Items\""))
 
 (use-package! calfw
   :config
