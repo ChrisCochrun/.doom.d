@@ -40,6 +40,7 @@
   - [[#line-mode-simulation][LINE MODE SIMULATION]]
   - [[#auto-start][AUTO-START]]
   - [[#ivy-specific][IVY SPECIFIC]]
+  - [[#transparency][Transparency]]
 - [[#edwina][Edwina]]
 - [[#tramp][Tramp]]
 - [[#transmission][Transmission]]
@@ -113,7 +114,7 @@ Welcome to my doom emacs config. I'm using literate programming because it allow
 #+END_SRC
 * Native Compile
 Since we are using gccemacs with native compile. Let's make sure external packages can be native compiled.
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (setq package-native-compile t)
 #+end_src
 
@@ -306,8 +307,8 @@ We also need to setup some capture templates to use some specific setups with my
   :config
   (setq org-roam-directory "~/org")
   (setq org-roam-buffer-width 0.25)
-  (setq org-roam-directory "/home/chris/org")
-  (setq org-roam-file-exclude-regexp ".*~.*")
+  (setq org-roam-file-exclude-regexp ".*stversion.*\|.*\.sync-conflict.*\|.*~.*")
+  (setq org-roam-db-location "~/.config/doom/org-roam.db")
   (setq org-roam-capture-templates
         '(("d" "default" plain (function org-roam--capture-get-point)
            "%?"
@@ -542,6 +543,10 @@ interfere with the default `bongo-playlist-buffer'."
 #+end_src
 
 * EMMS
+:PROPERTIES:
+:header-args: :tangle no
+:END:
+
 #+BEGIN_SRC elisp
 (map! :leader "o M" 'emms)
 (require 'emms-setup)
@@ -695,14 +700,11 @@ Let's setup some notifications for Mu4e and then set the update interval to ever
 (add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
 (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display)
 (setq mu4e-alert-email-notification-types '(count))
-(setq mu4e-update-interval 600)
+(setq mu4e-update-interval 180)
 
 (setq mu4e-alert-interesting-mail-query
       (concat
-       "flag:unread"
-       " AND NOT flag:trashed"
-       " AND NOT maildir:"
-       "\"/outlook/Junk\" AND NOT maildir:\"/office/Junk Email\" AND NOT maildir:\"/outlook/Deleted\" AND NOT maildir:\"/office/Deleted Items\""))
+       "flag:unread AND NOT flag:trashed AND NOT maildir:\"/outlook/Junk\" AND NOT maildir:\"/office/Junk Email\" AND NOT maildir:\"/outlook/Deleted\" AND NOT maildir:\"/office/Deleted Items\""))
 #+END_SRC
 
 #+BEGIN_SRC elisp :tangle no
@@ -887,12 +889,9 @@ Here are settings to make matrix-client.el work
 
 
 ;; Make Emacs transparent
-(set-frame-parameter (selected-frame) 'alpha nil)
-(add-to-list 'default-frame-alist '(alpha nil))
+;; (set-frame-parameter (selected-frame) 'alpha '(80 . 80))
+;; (add-to-list 'default-frame-alist '(alpha '(80 . 80)))
 #+END_SRC
-
-#+RESULTS:
-: ((alpha nil) (right-divider-width . 1) (bottom-divider-width . 1) (font . -*-VictorMono Nerd Font-semibold-*-*-*-*-120-*-*-*-*-*-*) (alpha 100 100) (vertical-scroll-bars) (tool-bar-lines . 0) (menu-bar-lines . 0) (buffer-predicate . doom-buffer-frame-predicate) (left-fringe . 4) (right-fringe . 4))
 
 QT/QML
 Ensure qml is added to the completion engine company
@@ -950,7 +949,7 @@ Ensure qml is added to the completion engine company
 ** IVY
 #+BEGIN_SRC elisp :tangle yes
 ;; Using counsel-linux-app for app launcher
-(custom-set-variables '(counsel-linux-app-format-function #'counsel-linux-app-format-function-name-first))
+(custom-set-variables '(counsel-linux-app-format-function #'counsel-linux-app-format-function-name-pretty))
 (map! :leader "f f" 'counsel-find-file
       :leader "." 'counsel-find-file)
 ;; (setq +ivy-buffer-preview t)
@@ -1028,7 +1027,7 @@ When using exwm, the loading process looks nicer if we set it to launch fullscre
 
 ** MAIN EXWM
 Also, we need a way to display the time and battery.
-#+BEGIN_SRC elisp
+#+BEGIN_SRC elisp :tangle no
 (display-time-mode t)
 (setq display-time-interval 60)
 (setq display-time-format "%a %b %e, %l:%M %p")
@@ -1038,10 +1037,10 @@ Also, we need a way to display the time and battery.
 #+RESULTS:
 : t
 
+
 #+BEGIN_SRC elisp
 (require 'exwm)
 (require 'exwm-config)
-;; (exwm-config-example)
 (exwm-enable)
 
 (require 'exwm-randr)
@@ -1052,16 +1051,28 @@ Also, we need a way to display the time and battery.
      "xrandr" nil "xrandr --output DVI-D-0 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output HDMI-0 --mode 1600x900 --pos 1920x0 --rotate normal")))
 (exwm-randr-enable)
 
-(require 'exwm-systemtray)
-(exwm-systemtray-enable)
-(if (string= system-name "chris-linuxlaptop")
-    (setq exwm-systemtray-height 38
-          exwm-systemtray-icon-gap 12)
-  (setq exwm-systemtray-height 18
-        exwm-systemtray-icon-gap 6))
+;; (require 'exwm-systemtray)
+;; (exwm-systemtray-enable)
+;; (if (string= system-name "chris-linuxlaptop")
+;;     (setq exwm-systemtray-height 38
+;;           exwm-systemtray-icon-gap 12)
+;;   (setq exwm-systemtray-height 18
+;;         exwm-systemtray-icon-gap 6))
 
 (setq exwm-workspace-number 4
       exwm-workspace-show-all-buffers t)
+(setq chris/panel-process nil)
+(defun chris/kill-panel ()
+  (interactive)
+  (when chris/panel-process
+    (ignore-errors
+      (kill-process chris/panel-process)))
+  (setq chris/panel-process nil))
+
+(defun chris/start-panel ()
+  (interactive)
+  (chris/kill-panel)
+  (setq chris/panel-process (start-process-shell-command "polybar" nil "polybar float")))
 
 ;; Rename buffer to window title
 (defun chris/exwm-rename-buffer-to-title ()
@@ -1141,6 +1152,7 @@ Also, we need a way to display the time and battery.
                      (interactive (list (read-shell-command "$ ")))
                      (start-process-shell-command command nil command)))
         ([menu] . counsel-linux-app)
+        ([s-space] . +eshell/toggle)
         ;; 's-N': Switch to certain workspace.
         ,@(mapcar (lambda (i)
                     `(,(kbd (format "s-%d" i)) .
@@ -1220,6 +1232,15 @@ Make sure that Ivy's posframe loads above exwm windows
 
 #+RESULTS:
 : t
+
+** Transparency
+Not sure how to do this properly, but I want transparency to be default and it's breaking my config.
+#+begin_src emacs-lisp :tangle no
+(after! exwm
+  (set-frame-parameter (selected-frame) 'alpha '(80 . 80))
+  (add-to-list 'default-frame-alist '(alpha '(80 . 80)))
+  (chris/start-panel))
+#+end_src
 * Edwina
 Not using this right now.
 #+BEGIN_SRC elisp :tangle no

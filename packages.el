@@ -55,7 +55,7 @@
 (package! olivetti)
 (package! org-autolist)
 (package! org-wild-notifier)
-(package! emms)
+;; (package! emms)
 (package! mpv)
 (package! bongo)
 (package! nov)
