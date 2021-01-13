@@ -185,6 +185,7 @@
   (setq org-roam-directory "~/org")
   (setq org-roam-buffer-width 0.25)
   (setq org-roam-file-exclude-regexp ".*stversion.*\|.*\.sync-conflict.*\|.*~.*")
+  (setq org-roam-db-location "~/.config/doom/org-roam.db")
   (setq org-roam-capture-templates
         '(("d" "default" plain (function org-roam--capture-get-point)
            "%?"
@@ -341,44 +342,6 @@ interfere with the default `bongo-playlist-buffer'."
         :n "u" 'bongo-unmark-region
         :n "p" 'bongo-pause/resume
         :n "m" 'chris/bongo-mark-line-forward))
-
-(map! :leader "o M" 'emms)
-(require 'emms-setup)
-(emms-all)
-(emms-default-players)
-(setq emms-volume-change-function 'emms-volume-pulse-change)
-(add-to-list 'emms-player-list 'emms-player-mpd)
-
-(map! :leader
-      (:prefix ("e" . "EMMS")
-       :desc "Pause" "p" 'emms-pause))
-
-(defhydra chris/hydra/emms-controls (:hint nil)
-  "
-   audio: _j_:lower     _k_:raise
-    seek: _h_:backward  _l_:forward  _H_:back 30sec
-    play: _p_ause/_p_lay
-
-    quit: _q_
-"
-  ("h" emms-seek-backward)
-  ("j" emms-volume-lower)
-  ("k" emms-volume-raise)
-  ("l" emms-seek-forward)
-  ("H" chris/emms-seek-backward)
-
-  ("p" emms-pause)
-
-  ("q" nil))
-
-(map! :leader
-      :desc "EMMS Controls" "e a" 'chris/hydra/emms-controls/body
-      :desc "Seek Back Hydra" "e h" 'chris/hydra/emms-cotrols/emms-seek-backward
-      :desc "Seek Back 30s Hydra" "e H" 'chris/hydra/emms-cotrols/chris/emms-seek-backward
-      :desc "Seek Forward Hydra" "e l" 'chris/hydra/emms-cotrols/emms-seek-forward
-      :desc "Volume Down Hydra" "e j" 'chris/hydra/emms-cotrols/emms-volume-lower
-      :desc "Volume Up Hydra" "e k" 'chris/hydra/emms-cotrols/emms-volume-raise
-      :desc "Pause Hydra" "e P" 'chris/hydra/emms-cotrols/emms-pause)
 
 ;; Add gmail
 (set-email-account! "gmail"
@@ -569,8 +532,8 @@ interfere with the default `bongo-playlist-buffer'."
 
 
 ;; Make Emacs transparent
-(set-frame-parameter (selected-frame) 'alpha nil)
-(add-to-list 'default-frame-alist '(alpha nil))
+;; (set-frame-parameter (selected-frame) 'alpha '(80 . 80))
+;; (add-to-list 'default-frame-alist '(alpha '(80 . 80)))
 
 (add-to-list 'company-backends 'company-qml)
 
@@ -583,7 +546,7 @@ interfere with the default `bongo-playlist-buffer'."
 (setq company-idle-delay 0.1)
 
 ;; Using counsel-linux-app for app launcher
-(custom-set-variables '(counsel-linux-app-format-function #'counsel-linux-app-format-function-name-first))
+(custom-set-variables '(counsel-linux-app-format-function #'counsel-linux-app-format-function-name-pretty))
 (map! :leader "f f" 'counsel-find-file
       :leader "." 'counsel-find-file)
 ;; (setq +ivy-buffer-preview t)
@@ -630,14 +593,8 @@ interfere with the default `bongo-playlist-buffer'."
 
 (set-frame-parameter nil 'fullscreen 'fullboth)
 
-(display-time-mode t)
-(setq display-time-interval 60)
-(setq display-time-format "%a %b %e, %l:%M %p")
-(display-battery-mode)
-
 (require 'exwm)
 (require 'exwm-config)
-(exwm-config-example)
 (exwm-enable)
 
 (require 'exwm-randr)
@@ -648,16 +605,28 @@ interfere with the default `bongo-playlist-buffer'."
      "xrandr" nil "xrandr --output DVI-D-0 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output HDMI-0 --mode 1600x900 --pos 1920x0 --rotate normal")))
 (exwm-randr-enable)
 
-(require 'exwm-systemtray)
-(exwm-systemtray-enable)
-(if (string= system-name "chris-linuxlaptop")
-    (setq exwm-systemtray-height 38
-          exwm-systemtray-icon-gap 12)
-  (setq exwm-systemtray-height 18
-        exwm-systemtray-icon-gap 6))
+;; (require 'exwm-systemtray)
+;; (exwm-systemtray-enable)
+;; (if (string= system-name "chris-linuxlaptop")
+;;     (setq exwm-systemtray-height 38
+;;           exwm-systemtray-icon-gap 12)
+;;   (setq exwm-systemtray-height 18
+;;         exwm-systemtray-icon-gap 6))
 
 (setq exwm-workspace-number 8
       exwm-workspace-show-all-buffers t)
+(setq chris/panel-process nil)
+(defun chris/kill-panel ()
+  (interactive)
+  (when chris/panel-process
+    (ignore-errors
+      (kill-process chris/panel-process)))
+  (setq chris/panel-process nil))
+
+(defun chris/start-panel ()
+  (interactive)
+  (chris/kill-panel)
+  (setq chris/panel-process (start-process-shell-command "polybar" nil "polybar float")))
 
 ;; Rename buffer to window title
 (defun chris/exwm-rename-buffer-to-title ()
@@ -737,6 +706,7 @@ interfere with the default `bongo-playlist-buffer'."
                      (interactive (list (read-shell-command "$ ")))
                      (start-process-shell-command command nil command)))
         ([menu] . counsel-linux-app)
+        ([s-space] . +eshell/toggle)
         ;; 's-N': Switch to certain workspace.
         ,@(mapcar (lambda (i)
                     `(,(kbd (format "s-%d" i)) .
@@ -764,9 +734,8 @@ interfere with the default `bongo-playlist-buffer'."
 
 (start-process-shell-command "xset" nil "xset r rate 220 90")
 (start-process-shell-command "fehwall" nil "feh --bg-fill ~/Pictures/wallpapers/RoyalKing.png")
-(start-process-shell-command "picom" nil "picom")
+(start-process-shell-command "picom" nil "picom --experimental-backend")
 (start-process-shell-command "flameshot" nil "flameshot")
-(start-process-shell-command "nextcloud" nil "nextcloud")
 (start-process-shell-command "caffeine" nil "caffeine")
 (start-process-shell-command "kdeconnect-indicator" nil "kdeconnect-indicator")
 
@@ -806,8 +775,6 @@ interfere with the default `bongo-playlist-buffer'."
 (setq transmission-host "192.168.1.7"
       transmission-rpc-path "/transmission/rpc"
       transmission-refresh-modes '(transmission-mode transmission-files-mode transmission-info-mode transmission-peers-mode))
-
-(setq package-native-compile t)
 
 (setq pdf-misc-print-programm "/usr/bin/lpr")
 (setq pdf-misc-print-programm-args (quote ("-o media=Letter" "-o sides=two-sided-long-edge")))
