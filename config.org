@@ -16,6 +16,7 @@
   - [[#org-wild-notifier][Org Wild Notifier]]
 - [[#org-roam][Org Roam]]
 - [[#zen-mode][Zen Mode]]
+- [[#dired][Dired]]
 - [[#elfeed][Elfeed]]
 - [[#bongo][Bongo]]
 - [[#emms][EMMS]]
@@ -235,22 +236,22 @@ Here is our org capture templates
 
 ** Org Super Agenda
 Here we need to setup how we want org super agenda to look
-#+BEGIN_SRC elisp
+#+BEGIN_SRC elisp :tangle yes
 (use-package! org-super-agenda
   :after org-agenda
   :init
   (setq org-super-agenda-groups '((:name "Today"
-                                         :time-grid t
-                                         :scheduled today)
+                                   :time-grid t
+                                   :scheduled today)
                                   (:name "Due Today"
-                                         :deadline today)
+                                   :deadline today)
                                   (:name "Important"
-                                         :priority "A")
+                                   :priority "A")
                                   (:name "Overdue"
-                                         :time-grid t
-                                         :scheduled today)
+                                   :time-grid t
+                                   :scheduled today)
                                   (:name "Due soon"
-                                         :deadline future)))
+                                   :deadline future)))
   :config
   (org-super-agenda-mode))
 (setq org-super-agenda-header-map nil)
@@ -280,7 +281,7 @@ We don't want to export the table of contents or the author most of the time.
 (add-hook 'org-font-lock-set-keywords-hook #'chris/org-add-my-extra-markup)
 #+END_SRC
 ** Org Wild Notifier
-#+begin_src elisp
+#+begin_src elisp :tangle yes
 (use-package! org-wild-notifier
   :init (org-wild-notifier-mode 1)
   :custom
@@ -295,17 +296,18 @@ We don't want to export the table of contents or the author most of the time.
 
 * Org Roam
 
-Basic Org-Roam setup. We select the directory and the basic width of the Org-Roam buffer so that it fits right. We also want to exclude certain files from Org-Roam. All files are synced between machines using synthing and kept in a version history. I'd like to exclude the version history from Org-Roam.
+Basic Org-Roam setup. We select the directory and the basic width of the Org-Roam buffer so that it fits right. We also want to exclude certain files from Org-Roam. All files are synced between machines using syncthing and kept in a version history. I'd like to exclude the version history from Org-Roam using =org-roam-file-exclude-regexp=.
 
 We also need to setup some capture templates to use some specific setups with my journalling. These include a space for my [[file:../../org/homework_for_life.org][Homework For Life]], tasks for the day, and how I can love on my family.
-#+BEGIN_SRC elisp
+#+BEGIN_SRC elisp :tangle yes
 ;; Org-Roam
 
 (use-package! org-roam
   :config
   (setq org-roam-directory "~/org")
   (setq org-roam-buffer-width 0.25)
-  (setq org-roam-file-exclude-regexp ".*stversion.*\|.*\.sync-conflict.*\|.*~.*")
+  (setq org-roam-directory "/home/chris/org")
+  (setq org-roam-file-exclude-regexp ".*~.*")
   (setq org-roam-capture-templates
         '(("d" "default" plain (function org-roam--capture-get-point)
            "%?"
@@ -319,12 +321,12 @@ We also need to setup some capture templates to use some specific setups with my
   (setq org-roam-dailies-capture-templates
         '(("d" "daily" plain #'org-roam-capture--get-point ""
            :immediate-finish t
-           :file-name "%<%m-%d-%Y>"
-           :head "#+TITLE: %<%m-%d-%Y>\n#+AUTHOR: Chris Cochrun\n#+CREATED: %<%D - %I:%M %p>\n\n* HFL\n* Tasks\n* Family\n** How Do I Love Abbie?")
+           :file-name "%<%Y-%m-%d>"
+           :head "#+TITLE: %<%Y-%m-%d>\n#+AUTHOR: Chris Cochrun\n#+CREATED: %<%D - %I:%M %p>\n\n* HFL\n* Tasks\n* Family\n** How Do I Love Abbie?")
           ("b" "biblical daily" plain #'org-roam-capture--get-point ""
            :immediate-finish t
-           :file-name "%<%m-%d-%Y>-bib"
-           :head "#+TITLE: %<%m-%d-%Y> - Biblical\n#+AUTHOR: Chris Cochrun")))
+           :file-name "%<%Y-%m-%d>-bib"
+           :head "#+TITLE: %<%Y-%m-%d> - Biblical\n#+AUTHOR: Chris Cochrun")))
   (map! :leader
         :n "n r D" 'org-roam-db-build-cache))
 #+END_SRC
@@ -333,7 +335,9 @@ We also need to setup some capture templates to use some specific setups with my
 : t
 
 Org-Roam server. This let's me visualize my notes.
-#+BEGIN_SRC elisp
+
+In order to use it, I need to go to http://localhost:8080
+#+BEGIN_SRC elisp :tangle yes
 (use-package! org-roam-server
   :config
   (setq org-roam-server-host "127.0.0.1"
@@ -349,7 +353,7 @@ Org-Roam server. This let's me visualize my notes.
 (add-hook! org-roam-mode org-roam-server-mode t)
 #+END_SRC
 
-#+begin_src elisp
+#+begin_src elisp :tangle yes
 (defun chris/+org-roam-capture-open-frame (&optional initial-input key)
   "Opens the org-capture window in a floating frame that cleans itself up once
 you're done. This can be called from an external shell script."
@@ -386,6 +390,10 @@ you're done. This can be called from an external shell script."
 ;; (setq +zen-text-scale 1.5)
 ;; (setq writeroom-global-effects writeroom-set-menu-bar-lines writeroom-set-tool-bar-lines writeroom-set-vertical-scroll-bars writeroom-set-bottom-divider-width)
 #+END_SRC
+* Dired
+Here I need to set some specific Dired settings. I use the =ranger= flag for dired, but it changes the keybindings for marking files which I don't like.
+#+begin_src emacs-lisp :tangle yes
+#+end_src
 * Elfeed
 
 Start by adding an easy way to open elfeed and force and update everytime we open it and keep org-roam from opening since elfeed will use org-mode to get it's list of subscribed feeds.
@@ -519,7 +527,7 @@ interfere with the default `bongo-playlist-buffer'."
     (interactive)
     (bongo-mark-line)
     (goto-char (bongo-point-after-object))
-    (goto-char (bongo-point-after-object)))
+    (next-line))
 
   (defun chris/bongo-mpv-pause/resume ()
     (interactive)
@@ -529,7 +537,7 @@ interfere with the default `bongo-playlist-buffer'."
         :n "RET" 'bongo-dwim
         :n "d" 'bongo-kill
         :n "u" 'bongo-unmark-region
-        :n "p" 'bongo-pause/resume
+        :n "t" 'bongo-pause/resume
         :n "m" 'chris/bongo-mark-line-forward))
 #+end_src
 
@@ -1006,7 +1014,7 @@ Here we are defining a window moving hydra that helps us to grow, shrink switch 
 
 * EXWM
 :PROPERTIES:
-:header-args: :tangle no
+:header-args: :tangle yes
 :END:
 
 Through the power of Org-Mode we can turn this off and on depending on if the next time Emacs is launched I want it to be my window manager.
@@ -1015,6 +1023,8 @@ When using exwm, the loading process looks nicer if we set it to launch fullscre
 #+BEGIN_SRC elisp
 (set-frame-parameter nil 'fullscreen 'fullboth)
 #+END_SRC
+
+#+RESULTS:
 
 ** MAIN EXWM
 Also, we need a way to display the time and battery.
@@ -1031,7 +1041,7 @@ Also, we need a way to display the time and battery.
 #+BEGIN_SRC elisp
 (require 'exwm)
 (require 'exwm-config)
-(exwm-config-example)
+;; (exwm-config-example)
 (exwm-enable)
 
 (require 'exwm-randr)
@@ -1050,7 +1060,7 @@ Also, we need a way to display the time and battery.
   (setq exwm-systemtray-height 18
         exwm-systemtray-icon-gap 6))
 
-(setq exwm-workspace-number 8
+(setq exwm-workspace-number 4
       exwm-workspace-show-all-buffers t)
 
 ;; Rename buffer to window title
@@ -1150,6 +1160,9 @@ Also, we need a way to display the time and battery.
                                     floating t
                                     floating-mode-line nil)))
 #+END_SRC
+
+#+RESULTS:
+
 ** LINE MODE SIMULATION
 EXWM has the ability to change keybindings for all X applications and therefore consilidate keybindings. Here, we'll use some of those keybindings to make sure our X applications work well within EXWM.
 
@@ -1165,9 +1178,8 @@ EXWM has the ability to change keybindings for all X applications and therefore 
 #+BEGIN_SRC elisp
 (start-process-shell-command "xset" nil "xset r rate 220 90")
 (start-process-shell-command "fehwall" nil "feh --bg-fill ~/Pictures/wallpapers/RoyalKing.png")
-(start-process-shell-command "picom" nil "picom")
+(start-process-shell-command "picom" nil "picom --experimental-backend")
 (start-process-shell-command "flameshot" nil "flameshot")
-(start-process-shell-command "nextcloud" nil "nextcloud")
 (start-process-shell-command "caffeine" nil "caffeine")
 (start-process-shell-command "kdeconnect-indicator" nil "kdeconnect-indicator")
 #+END_SRC
@@ -1176,22 +1188,22 @@ EXWM has the ability to change keybindings for all X applications and therefore 
 Make sure that Ivy's posframe loads above exwm windows
 #+BEGIN_SRC elisp :tangle yes
 (use-package! ivy-posframe
-    :config
+  :config
   (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
   (defun +ivy-posframe-display-exwm (str)
     (ivy-posframe--display str
-      (lambda (info)
-        (let* ((workarea (elt exwm-workspace--workareas exwm-workspace-current-index))
-               (x (aref workarea 0))
-               (y (aref workarea 1))
+                           (lambda (info)
+                             (let* ((workarea (elt exwm-workspace--workareas exwm-workspace-current-index))
+                                    (x (aref workarea 0))
+                                    (y (aref workarea 1))
 
-               (fw (aref workarea 2))
-               (fh (aref workarea 3))
+                                    (fw (aref workarea 2))
+                                    (fh (aref workarea 3))
 
-               (pw (plist-get info :posframe-width))
-               (ph (plist-get info :posframe-height)))
+                                    (pw (plist-get info :posframe-width))
+                                    (ph (plist-get info :posframe-height)))
 
-          (cons (+ x (/ (- fw pw) 2)) (+ y (/ (- fh ph) 2)))))))
+                               (cons (+ x (/ (- fw pw) 2)) (+ y (/ (- fh ph) 2)))))))
 
   (setq ivy-posframe-display-functions-alist
         '((t . +ivy-posframe-display-exwm))
@@ -1201,10 +1213,9 @@ Make sure that Ivy's posframe loads above exwm windows
 
   ;; force set frame-position on every posframe display
   (advice-add 'posframe--set-frame-position :before
-               (lambda (&rest args)
-                 (setq-local posframe--last-posframe-pixel-position nil)))
+              (lambda (&rest args)
+                (setq-local posframe--last-posframe-pixel-position nil)))
   :after exwm)
-
 #+END_SRC
 
 #+RESULTS:
