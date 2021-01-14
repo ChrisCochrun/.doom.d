@@ -547,8 +547,8 @@ interfere with the default `bongo-playlist-buffer'."
 
 ;; Using counsel-linux-app for app launcher
 (custom-set-variables '(counsel-linux-app-format-function #'counsel-linux-app-format-function-name-pretty))
-(map! :leader "f f" 'counsel-find-file
-      :leader "." 'counsel-find-file)
+;; (map! :leader "f f" 'counsel-find-file
+;;       :leader "." 'counsel-find-file)
 ;; (setq +ivy-buffer-preview t)
 
 (defhydra +hydra/window-move (:hint nil)
@@ -615,7 +615,9 @@ interfere with the default `bongo-playlist-buffer'."
 
 (setq exwm-workspace-number 4
       exwm-workspace-show-all-buffers t)
+
 (setq chris/panel-process nil)
+
 (defun chris/kill-panel ()
   (interactive)
   (when chris/panel-process
@@ -626,7 +628,10 @@ interfere with the default `bongo-playlist-buffer'."
 (defun chris/start-panel ()
   (interactive)
   (chris/kill-panel)
-  (setq chris/panel-process (start-process-shell-command "polybar" nil "polybar float")))
+  (if (string= (shell-command-to-string "hostname") "archdesktop
+")
+      (setq chris/panel-process (start-process-shell-command "polybar" nil "polybar float-desktop"))
+    (setq chris/panel-process (start-process-shell-command "polybar" nil "polybar float"))))
 
 ;; Rename buffer to window title
 (defun chris/exwm-rename-buffer-to-title ()
@@ -761,6 +766,7 @@ interfere with the default `bongo-playlist-buffer'."
         '((t . +ivy-posframe-display-exwm))
 
         ivy-posframe-parameters '((parent-frame nil)
+                                  (alpha 75)
                                   (z-group . above)))
 
   ;; force set frame-position on every posframe display

@@ -950,8 +950,8 @@ Ensure qml is added to the completion engine company
 #+BEGIN_SRC elisp :tangle yes
 ;; Using counsel-linux-app for app launcher
 (custom-set-variables '(counsel-linux-app-format-function #'counsel-linux-app-format-function-name-pretty))
-(map! :leader "f f" 'counsel-find-file
-      :leader "." 'counsel-find-file)
+;; (map! :leader "f f" 'counsel-find-file
+;;       :leader "." 'counsel-find-file)
 ;; (setq +ivy-buffer-preview t)
 #+END_SRC
 
@@ -1061,7 +1061,9 @@ Also, we need a way to display the time and battery.
 
 (setq exwm-workspace-number 4
       exwm-workspace-show-all-buffers t)
+
 (setq chris/panel-process nil)
+
 (defun chris/kill-panel ()
   (interactive)
   (when chris/panel-process
@@ -1072,7 +1074,10 @@ Also, we need a way to display the time and battery.
 (defun chris/start-panel ()
   (interactive)
   (chris/kill-panel)
-  (setq chris/panel-process (start-process-shell-command "polybar" nil "polybar float")))
+  (if (string= (shell-command-to-string "hostname") "archdesktop
+")
+      (setq chris/panel-process (start-process-shell-command "polybar" nil "polybar float-desktop"))
+    (setq chris/panel-process (start-process-shell-command "polybar" nil "polybar float"))))
 
 ;; Rename buffer to window title
 (defun chris/exwm-rename-buffer-to-title ()
@@ -1221,6 +1226,7 @@ Make sure that Ivy's posframe loads above exwm windows
         '((t . +ivy-posframe-display-exwm))
 
         ivy-posframe-parameters '((parent-frame nil)
+                                  (alpha 75)
                                   (z-group . above)))
 
   ;; force set frame-position on every posframe display
@@ -1238,7 +1244,7 @@ Not sure how to do this properly, but I want transparency to be default and it's
 #+begin_src emacs-lisp :tangle no
 (after! exwm
   (set-frame-parameter (selected-frame) 'alpha '(80 . 80))
-  (add-to-list 'default-frame-alist '(alpha '(80 . 80)))
+  (add-to-list 'default-frame-alist '(alpha . '(80 . 80)))
   (chris/start-panel))
 #+end_src
 * Edwina
