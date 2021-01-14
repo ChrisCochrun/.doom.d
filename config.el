@@ -406,15 +406,18 @@ interfere with the default `bongo-playlist-buffer'."
         (:name "Messages with images" :query "mime:image/*" :key 112))
       mu4e-attachment-dir "/home/chris/Nextcloud/attachments")
 
-(mu4e-alert-set-default-style 'notifications)
-(add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
-(add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display)
-(setq mu4e-alert-email-notification-types '(count))
-(setq mu4e-update-interval 180)
+(use-package! mu4e
+  :config
+  (mu4e-alert-set-default-style 'notifications)
+  (add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
+  (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display)
+  (setq mu4e-alert-email-notification-types '(count))
+  (setq mu4e-update-interval 180)
 
-(setq mu4e-alert-interesting-mail-query
-      (concat
-       "flag:unread AND NOT flag:trashed AND NOT maildir:\"/outlook/Junk\" AND NOT maildir:\"/office/Junk Email\" AND NOT maildir:\"/outlook/Deleted\" AND NOT maildir:\"/office/Deleted Items\""))
+  (setq mu4e-alert-interesting-mail-query
+        (concat
+         "flag:unread AND NOT flag:trashed AND NOT maildir:\"/outlook/Junk\" AND NOT maildir:\"/office/Junk Email\" AND NOT maildir:\"/outlook/Deleted\" AND NOT maildir:\"/office/Deleted Items\""))
+  (add-hook! 'mu4e-view-mode-hook olivetti-mode))
 
 (use-package! calfw
   :config
@@ -615,7 +618,12 @@ interfere with the default `bongo-playlist-buffer'."
 
 (setq exwm-workspace-number 4
       exwm-workspace-show-all-buffers t)
+
+(defun chris/send-polybar-hook (name number)
+  (start-process-shell-command "polybar-msg" nil (format "polybar-msg hook %s %s" name number)))
+
 (setq chris/panel-process nil)
+
 (defun chris/kill-panel ()
   (interactive)
   (when chris/panel-process
@@ -628,10 +636,18 @@ interfere with the default `bongo-playlist-buffer'."
   (chris/kill-panel)
   (setq chris/panel-process (start-process-shell-command "polybar" nil "polybar float")))
 
+(defun chris/update-polybar-mu4e ()
+  (interactive)
+  (chris/send-polybar-hook "exwm-mail" 1))
+
 ;; Rename buffer to window title
 (defun chris/exwm-rename-buffer-to-title ()
   (exwm-workspace-rename-buffer exwm-title))
 (add-hook! 'exwm-update-title-hook 'chris/exwm-rename-buffer-to-title)
+
+(defun chris/update-polybar-exwm (&optional path)
+  (interactive)
+  (chris/send-polybar-hook "exwm-buffer-name" 1))
 
 (defun chris/exwm-workspace-next ()
   "Move forward one workspace."
@@ -683,7 +699,7 @@ interfere with the default `bongo-playlist-buffer'."
         ([?\s-h] . chris/exwm-workspace-prev)
         ([?\s-l] . chris/exwm-workspace-next)
         ;; Switch Buffer
-        ([?\s-b] . exwm-workspace-switch-to-buffer)
+        ([?\s-b] . counsel-switch-buffer)
         ([?\s-m] . exwm-workspace-move-window)
         ;; close app
         ([?\s-c] . kill-this-buffer)
@@ -691,6 +707,8 @@ interfere with the default `bongo-playlist-buffer'."
         ([?\s-d] . chris/exwm-launch-dolphin)
         ;; Launch eshell
         ([s-return] . +eshell/toggle)
+        ;; Find File
+        ([?\s-f] . counsel-find-file)
         ;; screenshot
         ([print] . chris/exwm-flameshot)
         ;; Audio
@@ -725,6 +743,10 @@ interfere with the default `bongo-playlist-buffer'."
                                         (string= exwm-title "Event Tester"))
                                     floating t
                                     floating-mode-line nil)))
+
+(add-hook! 'doom-switch-buffer-hook #'chris/update-polybar-exwm)
+(add-hook! 'exwm-update-class-hook #'chris/update-polybar-exwm)
+(add-hook! 'mu4e-index-updated-hook #'chris/update-polybar-mu4e)
 
 (setq exwm-input-simulation-keys
       '(
@@ -761,6 +783,7 @@ interfere with the default `bongo-playlist-buffer'."
         '((t . +ivy-posframe-display-exwm))
 
         ivy-posframe-parameters '((parent-frame nil)
+                                  (alpha 75)
                                   (z-group . above)))
 
   ;; force set frame-position on every posframe display
@@ -792,3 +815,7 @@ interfere with the default `bongo-playlist-buffer'."
     (apply #'start-process "printing" nil program args)
     (message "Print job started: %s %s"
              program (mapconcat #'identity args " "))))
+
+(after! exwm
+  (set-frame-parameter (selected-frame) 'alpha '(80 . 80))
+  (chris/start-panel))
