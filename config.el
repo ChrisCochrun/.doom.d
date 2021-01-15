@@ -341,6 +341,7 @@ interfere with the default `bongo-playlist-buffer'."
         :n "d" 'bongo-kill
         :n "u" 'bongo-unmark-region
         :n "t" 'bongo-pause/resume
+        :n "h" 'bongo-switch-buffers
         :n "m" 'chris/bongo-mark-line-forward))
 
 ;; Add gmail
@@ -442,7 +443,7 @@ interfere with the default `bongo-playlist-buffer'."
       :n "q" 'cfw:details-kill-buffer-command)
 
 (use-package! eshell
-    :config
+  :config
   (require 'em-tramp)
 
   (with-eval-after-load 'esh-module   ;; REVIEW: It used to work, but now the early `provide' seems to backfire.
@@ -531,7 +532,7 @@ interfere with the default `bongo-playlist-buffer'."
 
 ;; Change default evil escape sequence to spacemacs style
 (setq evil-escape-key-sequence "fd")
-(setq doom-scratch-initial-major-mode 'org-mode)
+(setq doom-scratch-initial-major-mode 'fundamental-mode)
 
 
 ;; Make Emacs transparent
@@ -745,7 +746,9 @@ interfere with the default `bongo-playlist-buffer'."
                                         (string= exwm-class-name "dolphin")
                                         (string= exwm-title "Event Tester"))
                                     floating t
-                                    floating-mode-line nil)))
+                                    floating-mode-line nil)
+                                   ((or (string-match-p "mpv" exwm-class-name))
+                                    workspace 1)))
 
 (add-hook! 'doom-switch-buffer-hook #'chris/update-polybar-exwm)
 (add-hook! 'exwm-update-class-hook #'chris/update-polybar-exwm)

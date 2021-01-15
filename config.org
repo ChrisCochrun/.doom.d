@@ -539,6 +539,7 @@ interfere with the default `bongo-playlist-buffer'."
         :n "d" 'bongo-kill
         :n "u" 'bongo-unmark-region
         :n "t" 'bongo-pause/resume
+        :n "h" 'bongo-switch-buffers
         :n "m" 'chris/bongo-mark-line-forward))
 #+end_src
 
@@ -710,6 +711,9 @@ Let's setup some notifications for Mu4e and then set the update interval to ever
   (add-hook! 'mu4e-view-mode-hook olivetti-mode))
 #+END_SRC
 
+#+RESULTS:
+: t
+
 #+BEGIN_SRC elisp :tangle no
 (use-package! mu4e-views
   :after mu4e
@@ -773,7 +777,7 @@ First thing is let's make sure org-mode can speak ledger, then we'll make sure d
 * EShell
 #+BEGIN_SRC elisp
 (use-package! eshell
-    :config
+  :config
   (require 'em-tramp)
 
   (with-eval-after-load 'esh-module   ;; REVIEW: It used to work, but now the early `provide' seems to backfire.
@@ -840,6 +844,9 @@ First thing is let's make sure org-mode can speak ledger, then we'll make sure d
   (setq-default eshell-prompt-regexp "^ "))
 #+END_SRC
 
+#+RESULTS:
+: t
+
 Let's make sure autolist works well like tcsh
 #+begin_src elisp
 (setq eshell-cmpl-autolist t)
@@ -888,13 +895,16 @@ Here are settings to make matrix-client.el work
 
 ;; Change default evil escape sequence to spacemacs style
 (setq evil-escape-key-sequence "fd")
-(setq doom-scratch-initial-major-mode 'org-mode)
+(setq doom-scratch-initial-major-mode 'fundamental-mode)
 
 
 ;; Make Emacs transparent
 ;; (set-frame-parameter (selected-frame) 'alpha '(80 . 80))
 ;; (add-to-list 'default-frame-alist '(alpha '(80 . 80)))
 #+END_SRC
+
+#+RESULTS:
+: fundamental-mode
 
 QT/QML
 Ensure qml is added to the completion engine company
@@ -1191,7 +1201,9 @@ Also, we need a way to display the time and battery.
                                         (string= exwm-class-name "dolphin")
                                         (string= exwm-title "Event Tester"))
                                     floating t
-                                    floating-mode-line nil)))
+                                    floating-mode-line nil)
+                                   ((or (string-match-p "mpv" exwm-class-name))
+                                    workspace 1)))
 
 (add-hook! 'doom-switch-buffer-hook #'chris/update-polybar-exwm)
 (add-hook! 'exwm-update-class-hook #'chris/update-polybar-exwm)
